@@ -38,7 +38,6 @@
       overflow-x: hidden;
     }
 
-    /* ARCADE CABINET CHASSIS */
     .cabinet-wrapper {
       position: relative;
       width: 100%;
@@ -59,7 +58,6 @@
       gap: 14px;
     }
 
-    /* NEON LIGHT TUBES */
     .cabinet-wrapper::before, .cabinet-wrapper::after {
       content: '';
       position: absolute;
@@ -78,7 +76,6 @@
       100% { opacity: 1; filter: drop-shadow(0 0 25px var(--neon-cyan)); }
     }
 
-    /* RIVETS */
     .rivet {
       position: absolute; width: 8px; height: 8px; border-radius: 50%;
       background: linear-gradient(135deg, #7c6f9e 0%, #1a1528 100%);
@@ -89,7 +86,6 @@
     .rivet.bl { bottom: 10px; left: 10px; }
     .rivet.br { bottom: 10px; right: 10px; }
 
-    /* MARQUEE HEADER */
     .marquee-housing {
       background: linear-gradient(180deg, #180d2b 0%, #05020a 100%);
       border: 4px solid #4a386e;
@@ -126,7 +122,6 @@
       97% { opacity: 1; }
     }
 
-    /* CRT BEZEL & SCREEN FRAME */
     .crt-housing {
       background: linear-gradient(180deg, #0c0917 0%, #020105 100%);
       border: 6px solid #231b36;
@@ -137,7 +132,6 @@
       overflow: hidden;
     }
 
-    /* CRT SCANLINES & OVERLAY */
     .crt-housing::before {
       content: ""; position: absolute; top: 0; left: 0; right: 0; bottom: 0;
       background: linear-gradient(135deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0) 40%, rgba(0,0,0,0.3) 100%);
@@ -149,7 +143,6 @@
       background-size: 100% 4px; pointer-events: none; z-index: 11;
     }
 
-    /* VHS GLITCH BAR */
     .vhs-glitch-bar {
       position: absolute;
       left: 0; right: 0; height: 14px;
@@ -160,7 +153,6 @@
       opacity: 0;
     }
 
-    /* HUD METRICS */
     .hud-header {
       display: flex; justify-content: space-between; align-items: center;
       background: #090714; padding: 10px 16px; border-bottom: 2px solid #251c3d;
@@ -173,7 +165,6 @@
     .hud-val.pink { color: var(--neon-pink); text-shadow: 0 0 10px var(--neon-pink); }
     .hud-val.cyan { color: var(--neon-cyan); text-shadow: 0 0 10px var(--neon-cyan); }
 
-    /* GAME CANVAS */
     #gameCanvas {
       background: #04020a;
       width: 100%;
@@ -184,7 +175,6 @@
       z-index: 1;
     }
 
-    /* ATTRACT MODE OVERLAY */
     .attract-screen {
       position: absolute;
       top: 41px; left: 6px; right: 6px; bottom: 6px;
@@ -211,7 +201,6 @@
       box-shadow: 0 0 12px rgba(255, 204, 0, 0.3);
     }
 
-    /* DRAMATIC IN-SCREEN GAME OVER / LIQUIDATED SPLASH MODAL */
     .death-splash {
       position: absolute;
       top: 41px; left: 6px; right: 6px; bottom: 6px;
@@ -301,14 +290,12 @@
       100% { transform: translate(0, 0); }
     }
 
-    /* SYSTEM LOG BAR */
     .system-log-bar {
       background: #000; border: 2px solid #211938; border-radius: 6px;
       padding: 8px 12px; font-family: 'Silkscreen', monospace; font-size: 8px;
       color: var(--neon-green); text-shadow: 0 0 4px var(--neon-green);
     }
 
-    /* PHYSICAL CONTROL DECK */
     .control-panel {
       background: linear-gradient(180deg, #1c162e 0%, #0d0a17 100%);
       border: 3px solid #33274d; border-radius: 16px; padding: 14px;
@@ -317,7 +304,6 @@
       position: relative;
     }
 
-    /* WAGER SELECTOR ROW */
     .wager-row {
       display: flex; align-items: center; justify-content: space-between;
       background: #080612; padding: 8px 12px; border-radius: 8px; border: 1px solid #231b36;
@@ -334,7 +320,6 @@
       border-color: var(--neon-pink); color: #fff; box-shadow: 0 0 10px var(--neon-purple), 0 3px 0 #2a0040;
     }
 
-    /* BGM TOGGLE BUTTON */
     .bgm-toggle-btn {
       background: linear-gradient(180deg, #00aa77 0%, #004422 100%);
       border: 1px solid var(--neon-green); color: #fff; padding: 6px 10px; font-size: 7px;
@@ -345,7 +330,6 @@
       border-color: #772244; color: #888; box-shadow: none;
     }
 
-    /* ARCADE HARDWARE BUTTON DECK */
     .arcade-controls-grid {
       display: flex;
       justify-content: space-between;
@@ -353,7 +337,6 @@
       gap: 8px;
     }
 
-    /* COIN DOOR SLOT */
     .coin-door-mech {
       background: linear-gradient(180deg, #2b2310 0%, #120f07 100%);
       border: 2px solid var(--gold); border-radius: 8px; padding: 8px 10px;
@@ -366,7 +349,6 @@
     }
     .coin-btn-text { font-size: 6px; color: var(--gold); text-align: center; line-height: 1.2; }
 
-    /* PUSHBUTTONS */
     .button-cluster { display: flex; gap: 6px; align-items: center; }
     .mini-arc-btn {
       width: 38px; height: 38px; border-radius: 50%;
@@ -380,7 +362,6 @@
     .mini-arc-btn.cyan { background: radial-gradient(circle, #00f0ff, #007780); color: #000; font-weight: bold; }
     .mini-arc-btn.gold { background: radial-gradient(circle, #ffcc00, #886600); color: #000; font-weight: bold; }
 
-    /* MAIN ILLUMINATED BUTTON */
     .arcade-pushbtn-main {
       flex-grow: 1;
       background: radial-gradient(circle at 35% 35%, #ff3399 0%, var(--neon-pink) 50%, #990047 100%);
@@ -393,7 +374,6 @@
     .arcade-pushbtn-main:active { transform: translateY(5px); box-shadow: inset 0 2px 2px rgba(255, 255, 255, 0.4), 0 2px 0 #4d0024; }
     .arcade-pushbtn-main:disabled, .coin-door-mech.disabled { opacity: 0.35; cursor: not-allowed; transform: none !important; box-shadow: none !important; }
 
-    /* HARDWARE DECAL / STATUS LABELS */
     .decal-bar {
       display: flex; justify-content: space-between; align-items: center;
       font-size: 6px; color: #776a94; font-family: 'Silkscreen', monospace; padding: 0 2px;
@@ -405,7 +385,6 @@
     .led-bulb.net { background: #222; }
     .led-bulb.net.on { background: var(--neon-cyan); box-shadow: 0 0 6px var(--neon-cyan); }
 
-    /* STROBE & HARD SHAKE ANIMATIONS */
     .strobe-bg { animation: flashStrobe 0.18s ease-in-out; }
     @keyframes flashStrobe {
       0% { filter: brightness(2.8) contrast(2); }
@@ -452,7 +431,6 @@
 
       <canvas id="gameCanvas" width="600" height="310"></canvas>
 
-      <!-- ATTRACT MODE OVERLAY -->
       <div class="attract-screen" id="attractScreen">
         <div class="jackpot-banner">★ JACKPOT: <span id="overlayJackpot">12,345,678 $TRAP</span> ★</div>
         
@@ -470,7 +448,6 @@
         </div>
       </div>
 
-      <!-- DRAMATIC IN-SCREEN GAME OVER / LIQUIDATED SPLASH MODAL -->
       <div class="death-splash" id="deathSplash">
         <div class="death-title" id="deathTitle">💥 LIQUIDATED! 💥</div>
         <div class="death-subtitle" id="deathSubtitle">SKILL ISSUE! YOUR HANDS ARE MADE OF WET TISSUE PAPER 🤡</div>
@@ -492,7 +469,6 @@
 
         <button class="respawn-btn" id="respawnBtn">TRY AGAIN BRICKHEAD 🔄</button>
       </div>
-
     </div>
 
     <div class="system-log-bar" id="sysLog">> SYSTEM READY. Insert SOL or Connect Wallet to play.</div>
@@ -536,6 +512,10 @@
   </div>
 
   <script>
+    // ====================== CONFIG ======================
+    const DEV_WALLET = "D926ra7L1bCjpcZPZUgFNeYhXs9LXVcAwiAjyRtMAN3G";
+    const RPC_URL = "https://api.mainnet-beta.solana.com"; // change to "https://api.devnet.solana.com" for testing
+
     const sysLog = document.getElementById('sysLog');
     const connectBtn = document.getElementById('connectBtn');
     const playBtn = document.getElementById('playBtn');
@@ -557,7 +537,6 @@
     const ctx = canvas.getContext('2d');
     const bgmToggleBtn = document.getElementById('bgmToggleBtn');
 
-    // --- MOCKING / TROLLING INSULTS LIST ---
     const MOCK_MESSAGES = [
       "SKILL ISSUE 🤡 HANDS MADE OF WET TISSUE PAPER!",
       "NGMI! BUSTED HARDER THAN A SHITCOIN AT 3AM!",
@@ -576,28 +555,21 @@
       "BLIND OR JUST LAGGY? CENTER THE TARGET!"
     ];
 
-    // --- MEME PIXEL ART ENGINE ---
+    // Meme canvas
     const memeCanvas = document.getElementById('memeCanvas');
     const mctx = memeCanvas.getContext('2d');
     function drawMemePixelArt() {
       mctx.clearRect(0, 0, memeCanvas.width, memeCanvas.height);
-      
-      // Wojak
       mctx.fillStyle = "#e0c0a0"; mctx.fillRect(15, 10, 35, 45);
       mctx.fillStyle = "#000000"; mctx.fillRect(22, 22, 6, 4); mctx.fillRect(36, 22, 6, 4);
       mctx.fillStyle = "#00f0ff"; mctx.fillRect(22, 28, 4, 18); mctx.fillRect(36, 28, 4, 18);
       mctx.fillStyle = "#ff0000"; mctx.fillRect(26, 42, 12, 3);
-
-      // Pepe
       mctx.fillStyle = "#22b14c"; mctx.fillRect(120, 10, 45, 45);
       mctx.fillStyle = "#000"; mctx.fillRect(120, 20, 45, 12);
       mctx.fillStyle = "#ff0077"; mctx.fillRect(130, 38, 25, 5);
-
-      // Doge
       mctx.fillStyle = "#e5a73c"; mctx.fillRect(250, 10, 45, 45);
       mctx.fillStyle = "#000"; mctx.fillRect(250, 20, 45, 12);
       mctx.fillStyle = "#fff"; mctx.fillRect(255, 22, 10, 8);
-
       mctx.font = '7px "Press Start 2P"';
       mctx.fillStyle = '#ffcc00';
       mctx.textAlign = 'center';
@@ -606,9 +578,11 @@
     drawMemePixelArt();
 
     let playerWallet = null;
+    let connection = null;
     let selectedWager = 0.05;
     const BASE_JACKPOT = 0.100;
     let testRunsAccumulator = 0;
+    let playerCredits = 0;
 
     function setWager(amt, btn) {
       document.querySelectorAll('.wager-btn').forEach(b => b.classList.remove('active'));
@@ -626,7 +600,7 @@
       sysLog.innerText = `> ${msg}`;
     }
 
-    // --- SYNTH & PROCEDURAL BGM ENGINE ---
+    // ====================== AUDIO ENGINE (KEPT FULLY INTACT) ======================
     let audioCtx = null;
     let runOsc = null;
     let runGain = null;
@@ -636,14 +610,12 @@
     let bgmStep = 0;
     let bgmInterval = null;
 
-    // Frequencies for Synthwave/Chiptune Bass & Lead
     const NOTES = {
       A1: 55.00, C2: 65.41, D2: 73.42, E2: 82.41, F2: 87.31, G2: 98.00,
       A2: 110.00, C3: 130.81, D3: 146.83, E3: 164.81, F3: 174.61, G3: 196.00,
       A3: 220.00, C4: 261.63, E4: 329.63, G4: 392.00, A4: 440.00
     };
 
-    // 16-Step Retro Sequences
     const BASS_SEQ = [
       NOTES.A1, NOTES.A1, NOTES.A2, NOTES.A1,  NOTES.C2, NOTES.C2, NOTES.C3, NOTES.C2,
       NOTES.D2, NOTES.D2, NOTES.D3, NOTES.D2,  NOTES.F2, NOTES.F2, NOTES.E2, NOTES.E2
@@ -661,15 +633,10 @@
         bgmMasterGain.gain.setValueAtTime(bgmMuted ? 0.0 : 0.18, audioCtx.currentTime);
         bgmMasterGain.connect(audioCtx.destination);
       }
-      if (audioCtx.state === 'suspended') {
-        audioCtx.resume();
-      }
-      if (!bgmIsPlaying) {
-        startArcadeBGM();
-      }
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+      if (!bgmIsPlaying) startArcadeBGM();
     }
 
-    // Unlock audio context on any user click across page
     window.addEventListener('click', () => { initAudio(); }, { once: false });
 
     function toggleBGM() {
@@ -678,24 +645,16 @@
       if (bgmMasterGain) {
         bgmMasterGain.gain.setValueAtTime(bgmMuted ? 0.0 : 0.18, audioCtx.currentTime);
       }
-      if (bgmMuted) {
-        bgmToggleBtn.innerText = "AUDIO: MUTE";
-        bgmToggleBtn.classList.add('muted');
-      } else {
-        bgmToggleBtn.innerText = "AUDIO: ON";
-        bgmToggleBtn.classList.remove('muted');
-      }
+      bgmToggleBtn.innerText = bgmMuted ? "AUDIO: MUTE" : "AUDIO: ON";
+      bgmToggleBtn.classList.toggle('muted', bgmMuted);
     }
 
-    // Noise Generator for Snare / Hi-Hats
     function createNoiseBuffer() {
       if (!audioCtx) return null;
       const bufferSize = audioCtx.sampleRate * 0.1;
       const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
       const output = buffer.getChannelData(0);
-      for (let i = 0; i < bufferSize; i++) {
-        output[i] = Math.random() * 2 - 1;
-      }
+      for (let i = 0; i < bufferSize; i++) output[i] = Math.random() * 2 - 1;
       return buffer;
     }
 
@@ -705,8 +664,6 @@
       if (bgmIsPlaying) return;
       bgmIsPlaying = true;
       noiseBuffer = createNoiseBuffer();
-
-      // 135 BPM 16th-note clock (~111ms per step)
       bgmStep = 0;
       bgmInterval = setInterval(playBGMStep, 111);
     }
@@ -715,7 +672,6 @@
       if (!audioCtx || !bgmIsPlaying || audioCtx.state === 'suspended') return;
       const t = audioCtx.currentTime;
 
-      // 1. KICK DRUM (Every 4th step)
       if (bgmStep % 4 === 0) {
         const kOsc = audioCtx.createOscillator();
         const kGain = audioCtx.createGain();
@@ -727,7 +683,6 @@
         kOsc.start(t); kOsc.stop(t + 0.12);
       }
 
-      // 2. SNARE DRUM (On steps 4 & 12)
       if (bgmStep % 8 === 4 && noiseBuffer) {
         const nSrc = audioCtx.createBufferSource();
         nSrc.buffer = noiseBuffer;
@@ -741,7 +696,6 @@
         nSrc.start(t); nSrc.stop(t + 0.12);
       }
 
-      // 3. HI-HAT (Every 2nd step)
       if (bgmStep % 2 === 1 && noiseBuffer) {
         const hSrc = audioCtx.createBufferSource();
         hSrc.buffer = noiseBuffer;
@@ -755,7 +709,6 @@
         hSrc.start(t); hSrc.stop(t + 0.04);
       }
 
-      // 4. CHIPTUNE BASS (Pulse / Saw)
       const bFreq = BASS_SEQ[bgmStep % BASS_SEQ.length];
       if (bFreq) {
         const bOsc = audioCtx.createOscillator();
@@ -768,7 +721,6 @@
         bOsc.start(t); bOsc.stop(t + 0.09);
       }
 
-      // 5. SYNTH LEAD ARP (Square wave)
       const aFreq = ARP_SEQ[bgmStep % ARP_SEQ.length];
       if (aFreq) {
         const aOsc = audioCtx.createOscillator();
@@ -784,7 +736,6 @@
       bgmStep = (bgmStep + 1) % 16;
     }
 
-    // --- GAME SFX ENGINE ---
     function playTickSound(isGo = false) {
       if (!audioCtx) return;
       const osc = audioCtx.createOscillator();
@@ -834,7 +785,7 @@
       }
     }
 
-    // --- VISUAL DISTRACTION ENGINE ---
+    // ====================== VISUAL ENGINES (KEPT) ======================
     let distractions = [];
     const DISTRACTION_WORDS = ["NGMI!", "RUG PULL?", "BUY DIP!", "PUMP IT!", "FEELS BAD", "LIQUIDATED?", "HOLD!", "100X!", "JEOD!"];
 
@@ -856,7 +807,6 @@
         let d = distractions[i];
         d.x += d.vx; d.y += d.vy; d.alpha -= 0.015;
         if (d.alpha <= 0) { distractions.splice(i, 1); continue; }
-
         ctx.save();
         ctx.globalAlpha = d.alpha;
         ctx.font = `${d.size}px "Press Start 2P"`;
@@ -875,12 +825,11 @@
       cabinet.classList.add('strobe-bg');
     }
 
-    // --- PARTICLE ENGINE ---
     let particles = [];
     function spawnParticles(x, y) {
       for (let i = 0; i < 2; i++) {
         particles.push({
-          x: x, y: y,
+          x, y,
           vx: (Math.random() - 0.5) * 2,
           vy: (Math.random() - 0.5) * 2,
           alpha: 1.0,
@@ -903,17 +852,13 @@
       }
     }
 
-    // --- SHOW IN-SCREEN DEATH SPLASH MODAL ---
     function triggerDeathSplash(title, sub, time, mult, wager) {
       deathTitle.innerText = title;
       deathSubtitle.innerText = sub;
       deathTime.innerText = `${time.toFixed(3)}s`;
       deathMult.innerText = `x${mult}`;
       deathWager.innerText = `${wager} SOL`;
-
       deathSplash.style.display = 'flex';
-      
-      // Intense Cabinet Tremor & Strobe Flash
       cabinet.classList.remove('strobe-bg', 'cabinet-shake');
       void cabinet.offsetWidth;
       cabinet.classList.add('strobe-bg', 'cabinet-shake');
@@ -923,17 +868,23 @@
       deathSplash.style.display = 'none';
       attractScreen.style.display = 'flex';
       playBtn.disabled = false;
-      log("CREDITS STILL ACTIVE. Lock in and try again!");
+      document.exitPointerLock?.();
+      log("READY FOR NEXT RUN.");
     });
 
-    // --- WALLET CONNECTOR ---
+    // ====================== WALLET + REAL PAYMENT ======================
     async function connectPhantom() {
       initAudio();
-      const provider = window.solana || (window.phantom ? window.phantom.solana : null);
-      if (!provider) { alert("Phantom wallet not found!"); return; }
+      const provider = window.solana || window.phantom?.solana;
+      if (!provider) {
+        alert("Phantom wallet not found!");
+        return;
+      }
       try {
         const response = await provider.connect();
         playerWallet = response.publicKey.toString();
+        connection = new solanaWeb3.Connection(RPC_URL, "confirmed");
+
         const shortAddr = `${playerWallet.slice(0, 4)}...${playerWallet.slice(-4)}`;
         log(`SOL ACCEPTED: ${shortAddr}`);
         connectBtn.querySelector('.coin-btn-text').innerHTML = `CREDIT ON<br><span style="font-size:5px; color:#00ff66;">${shortAddr}</span>`;
@@ -946,7 +897,7 @@
     }
     connectBtn.addEventListener('click', connectPhantom);
 
-    // --- GAME ENGINE ---
+    // ====================== GAME ENGINE ======================
     let gameState = 'IDLE';
     let countdownRemaining = 3;
     let countdownStart = 0;
@@ -963,22 +914,65 @@
       if (gameState === 'ACTIVE') spawnParticles(cursor.x, cursor.y);
     });
 
-    playBtn.addEventListener('click', () => {
-      if (!playerWallet) return;
+    playBtn.addEventListener('click', async () => {
+      if (!playerWallet || !connection) {
+        log("CONNECT WALLET FIRST");
+        return;
+      }
+
       initAudio();
-
-      testRunsAccumulator += selectedWager;
-      renderJackpot();
-
-      gameState = 'COUNTDOWN';
-      countdownStart = performance.now();
-      lastTickSec = 4;
-      distractions = [];
       playBtn.disabled = true;
-      attractScreen.style.display = 'none';
-      deathSplash.style.display = 'none';
-      log(`LOCK-IN CONFIRMED (+${selectedWager} SOL). Center target in box!`);
-      requestAnimationFrame(gameLoop);
+      log(`PROCESSING ${selectedWager} SOL PAYMENT...`);
+
+      try {
+        const provider = window.solana || window.phantom?.solana;
+        const fromPubkey = new solanaWeb3.PublicKey(playerWallet);
+        const toPubkey = new solanaWeb3.PublicKey(DEV_WALLET);
+        const lamports = Math.floor(selectedWager * solanaWeb3.LAMPORTS_PER_SOL);
+
+        const transaction = new solanaWeb3.Transaction().add(
+          solanaWeb3.SystemProgram.transfer({
+            fromPubkey,
+            toPubkey,
+            lamports
+          })
+        );
+
+        const { blockhash } = await connection.getLatestBlockhash();
+        transaction.recentBlockhash = blockhash;
+        transaction.feePayer = fromPubkey;
+
+        const signed = await provider.signTransaction(transaction);
+        const signature = await connection.sendRawTransaction(signed.serialize());
+        
+        log(`TX SENT: ${signature.slice(0, 12)}... Confirming...`);
+        await connection.confirmTransaction(signature, "confirmed");
+
+        // Success
+        testRunsAccumulator += selectedWager;
+        renderJackpot();
+        playerCredits += 1;
+        log(`PAYMENT SUCCESS • STARTING RUN`);
+
+        // Start game
+        gameState = 'COUNTDOWN';
+        countdownStart = performance.now();
+        lastTickSec = 4;
+        distractions = [];
+        attractScreen.style.display = 'none';
+        deathSplash.style.display = 'none';
+
+        // Pointer Lock
+        canvas.requestPointerLock = canvas.requestPointerLock || canvas.mozRequestPointerLock;
+        if (canvas.requestPointerLock) canvas.requestPointerLock();
+
+        requestAnimationFrame(gameLoop);
+
+      } catch (err) {
+        console.error(err);
+        log(`PAYMENT FAILED: ${err.message || "User rejected"}`);
+        playBtn.disabled = false;
+      }
     });
 
     function gameLoop(timestamp) {
@@ -995,7 +989,7 @@
         ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(canvas.width, y); ctx.stroke();
       }
 
-      // --- COUNTDOWN WARM-UP ---
+      // COUNTDOWN
       if (gameState === 'COUNTDOWN') {
         const elapsedPrep = (timestamp - countdownStart) / 1000;
         countdownRemaining = Math.max(0, 3 - elapsedPrep);
@@ -1039,6 +1033,7 @@
             const randMock = START_FAIL_MESSAGES[Math.floor(Math.random() * START_FAIL_MESSAGES.length)];
             triggerDeathSplash("❌ START FAILED!", randMock, 0, "1.00", selectedWager);
             log("START FAILED: Outside safe zone!");
+            document.exitPointerLock?.();
             return;
           }
           playTickSound(true);
@@ -1052,7 +1047,7 @@
         return;
       }
 
-      // --- ACTIVE RUN ---
+      // ACTIVE RUN
       if (gameState === 'ACTIVE') {
         const elapsed = (timestamp - runStartTime) / 1000;
         timerDisplay.innerText = elapsed.toFixed(3) + 's';
@@ -1062,7 +1057,6 @@
 
         updateRunPitch(parseFloat(currentMult));
 
-        // DISTRACTION TRIGGER LOGIC
         if (timestamp - lastDistractTime > 800 - Math.min(elapsed * 25, 500)) {
           spawnDistraction();
           if (Math.random() < 0.25) {
@@ -1112,6 +1106,7 @@
           const randMock = MOCK_MESSAGES[Math.floor(Math.random() * MOCK_MESSAGES.length)];
           triggerDeathSplash("💥 LIQUIDATED! 💥", randMock, elapsed, currentMult, selectedWager);
           log(`LIQUIDATED! Survived ${elapsed.toFixed(2)}s at ${currentMult}x`);
+          document.exitPointerLock?.();
           return;
         }
 
