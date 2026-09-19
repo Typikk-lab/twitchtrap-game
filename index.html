@@ -1,0 +1,1125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TWITCHTRAP // DEGEN ARCADE SYSTEM</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Silkscreen:wght@400;700&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/@solana/web3.js@latest/lib/index.iife.min.js"></script>
+  <style>
+    :root {
+      --bg-dark: #030107;
+      --neon-pink: #ff0077;
+      --neon-pink-glow: #ff2a8d;
+      --neon-purple: #b000ff;
+      --neon-cyan: #00f0ff;
+      --neon-green: #00ff66;
+      --gold: #ffcc00;
+      --chassis-metal: #12101b;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Press Start 2P', monospace; }
+
+    body {
+      background: var(--bg-dark);
+      background-image: 
+        radial-gradient(circle at 50% 20%, rgba(176, 0, 255, 0.3) 0%, transparent 60%),
+        radial-gradient(circle at 50% 80%, rgba(255, 0, 119, 0.25) 0%, transparent 50%),
+        linear-gradient(180deg, #020106 0%, #080512 100%);
+      color: #fff;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 15px 10px;
+      user-select: none;
+      overflow-x: hidden;
+    }
+
+    /* ARCADE CABINET CHASSIS */
+    .cabinet-wrapper {
+      position: relative;
+      width: 100%;
+      max-width: 720px;
+      background: linear-gradient(180deg, #1c162e 0%, #0d0a17 40%, #07050e 100%);
+      border: 6px solid #3d3159;
+      border-radius: 24px;
+      padding: 22px;
+      box-shadow: 
+        0 0 0 2px #100d1c,
+        0 0 0 6px var(--neon-pink),
+        0 0 45px var(--neon-purple),
+        0 25px 50px rgba(0,0,0,0.9),
+        inset 0 2px 3px rgba(255,255,255,0.3),
+        inset 0 -10px 30px #000;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    /* NEON LIGHT TUBES */
+    .cabinet-wrapper::before, .cabinet-wrapper::after {
+      content: '';
+      position: absolute;
+      top: 25px; bottom: 25px;
+      width: 10px;
+      border-radius: 12px;
+      background: linear-gradient(180deg, #ff77bc 0%, var(--neon-pink) 50%, var(--neon-purple) 100%);
+      box-shadow: 0 0 15px var(--neon-pink), 0 0 30px var(--neon-purple), inset 0 0 6px #fff;
+      animation: neonPulse 2s infinite alternate;
+    }
+    .cabinet-wrapper::before { left: 8px; }
+    .cabinet-wrapper::after { right: 8px; }
+
+    @keyframes neonPulse {
+      0% { opacity: 0.85; filter: drop-shadow(0 0 10px var(--neon-pink)); }
+      100% { opacity: 1; filter: drop-shadow(0 0 25px var(--neon-cyan)); }
+    }
+
+    /* RIVETS */
+    .rivet {
+      position: absolute; width: 8px; height: 8px; border-radius: 50%;
+      background: linear-gradient(135deg, #7c6f9e 0%, #1a1528 100%);
+      box-shadow: inset 0 1px 1px rgba(255,255,255,0.5), 0 1px 2px #000;
+    }
+    .rivet.tl { top: 10px; left: 10px; }
+    .rivet.tr { top: 10px; right: 10px; }
+    .rivet.bl { bottom: 10px; left: 10px; }
+    .rivet.br { bottom: 10px; right: 10px; }
+
+    /* MARQUEE HEADER */
+    .marquee-housing {
+      background: linear-gradient(180deg, #180d2b 0%, #05020a 100%);
+      border: 4px solid #4a386e;
+      border-radius: 12px;
+      padding: 14px 10px;
+      text-align: center;
+      position: relative;
+      box-shadow: inset 0 0 20px rgba(255, 0, 119, 0.5), 0 0 20px rgba(255, 0, 119, 0.3), 0 4px 10px #000;
+    }
+    .marquee-title {
+      font-size: 32px;
+      letter-spacing: 4px;
+      color: #fff;
+      text-transform: uppercase;
+      text-shadow: 3px 3px 0px var(--neon-pink), -2px -2px 0px var(--neon-cyan), 0 0 25px var(--neon-pink-glow);
+      font-weight: 900;
+      animation: marqueeFlicker 4s infinite;
+    }
+    .marquee-sub {
+      font-family: 'Silkscreen', monospace;
+      font-size: 10px;
+      color: var(--gold);
+      letter-spacing: 3px;
+      margin-top: 6px;
+      text-shadow: 0 0 10px var(--gold);
+    }
+
+    @keyframes marqueeFlicker {
+      0%, 100% { opacity: 1; }
+      92% { opacity: 1; }
+      93% { opacity: 0.4; }
+      94% { opacity: 1; }
+      96% { opacity: 0.2; }
+      97% { opacity: 1; }
+    }
+
+    /* CRT BEZEL & SCREEN FRAME */
+    .crt-housing {
+      background: linear-gradient(180deg, #0c0917 0%, #020105 100%);
+      border: 6px solid #231b36;
+      border-radius: 16px;
+      padding: 6px;
+      box-shadow: inset 0 0 35px #000, 0 0 15px rgba(0, 0, 0, 0.8), 0 0 3px var(--neon-cyan);
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* CRT SCANLINES & OVERLAY */
+    .crt-housing::before {
+      content: ""; position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+      background: linear-gradient(135deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0) 40%, rgba(0,0,0,0.3) 100%);
+      pointer-events: none; z-index: 12;
+    }
+    .crt-housing::after {
+      content: ""; position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+      background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.45) 50%);
+      background-size: 100% 4px; pointer-events: none; z-index: 11;
+    }
+
+    /* VHS GLITCH BAR */
+    .vhs-glitch-bar {
+      position: absolute;
+      left: 0; right: 0; height: 14px;
+      background: rgba(255, 0, 119, 0.25);
+      mix-blend-mode: screen;
+      pointer-events: none;
+      z-index: 10;
+      opacity: 0;
+    }
+
+    /* HUD METRICS */
+    .hud-header {
+      display: flex; justify-content: space-between; align-items: center;
+      background: #090714; padding: 10px 16px; border-bottom: 2px solid #251c3d;
+      position: relative; z-index: 2;
+    }
+    .hud-card { display: flex; flex-direction: column; gap: 4px; }
+    .hud-lbl { font-size: 7px; color: #8e80b2; text-transform: uppercase; }
+    .hud-val { font-size: 13px; color: var(--neon-green); text-shadow: 0 0 8px var(--neon-green); }
+    .hud-val.gold { color: var(--gold); text-shadow: 0 0 10px var(--gold); }
+    .hud-val.pink { color: var(--neon-pink); text-shadow: 0 0 10px var(--neon-pink); }
+    .hud-val.cyan { color: var(--neon-cyan); text-shadow: 0 0 10px var(--neon-cyan); }
+
+    /* GAME CANVAS */
+    #gameCanvas {
+      background: #04020a;
+      width: 100%;
+      height: 310px;
+      display: block;
+      cursor: crosshair;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* ATTRACT MODE OVERLAY */
+    .attract-screen {
+      position: absolute;
+      top: 41px; left: 6px; right: 6px; bottom: 6px;
+      background: rgba(4, 2, 10, 0.94);
+      display: flex; flex-direction: column; align-items: center; justify-content: space-between;
+      padding: 14px; z-index: 8;
+    }
+    .attract-hero {
+      display: flex; align-items: center; justify-content: center; gap: 12px; margin-top: 2px;
+    }
+    .leaderboard-table {
+      width: 100%; max-width: 460px; font-size: 8px;
+      display: flex; flex-direction: column; gap: 5px;
+      background: rgba(0,0,0,0.65); border: 1px solid #281d42; padding: 8px 12px; border-radius: 6px;
+    }
+    .lb-row { display: flex; justify-content: space-between; color: #a295c4; border-bottom: 1px dashed #231b36; padding-bottom: 3px; }
+    .lb-row.top { color: var(--gold); text-shadow: 0 0 6px var(--gold); }
+    .lb-row.user { color: var(--neon-cyan); text-shadow: 0 0 6px var(--neon-cyan); }
+
+    .jackpot-banner {
+      background: linear-gradient(90deg, transparent, rgba(255, 204, 0, 0.18), transparent);
+      border: 1px solid var(--gold); padding: 6px 14px; border-radius: 20px;
+      color: var(--gold); font-size: 10px; text-shadow: 0 0 8px var(--gold);
+      box-shadow: 0 0 12px rgba(255, 204, 0, 0.3);
+    }
+
+    /* DRAMATIC IN-SCREEN GAME OVER / LIQUIDATED SPLASH MODAL */
+    .death-splash {
+      position: absolute;
+      top: 41px; left: 6px; right: 6px; bottom: 6px;
+      background: radial-gradient(circle at 50% 50%, rgba(40, 0, 15, 0.96) 0%, rgba(10, 0, 5, 0.98) 100%);
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      padding: 20px;
+      z-index: 15;
+      border: 2px solid var(--neon-pink);
+      box-shadow: inset 0 0 50px rgba(255, 0, 119, 0.6);
+      animation: deathOverlayIn 0.15s ease-out forwards;
+    }
+
+    @keyframes deathOverlayIn {
+      0% { opacity: 0; transform: scale(1.1); filter: brightness(3); }
+      100% { opacity: 1; transform: scale(1); filter: brightness(1); }
+    }
+
+    .death-title {
+      font-size: 32px;
+      color: #ff0055;
+      text-align: center;
+      letter-spacing: 2px;
+      text-shadow: 4px 4px 0 #000, -2px -2px 0 var(--neon-cyan), 0 0 30px #ff0055;
+      animation: rektZoom 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards, glitchShake 0.15s infinite;
+    }
+
+    .death-subtitle {
+      font-size: 10px;
+      color: var(--gold);
+      text-align: center;
+      line-height: 1.5;
+      max-width: 480px;
+      text-shadow: 0 0 8px var(--gold);
+      background: rgba(0,0,0,0.6);
+      padding: 8px 12px;
+      border-radius: 6px;
+      border: 1px dashed var(--gold);
+    }
+
+    .death-stats-card {
+      display: flex;
+      gap: 16px;
+      background: #000;
+      border: 1px solid #3d1c4a;
+      padding: 10px 18px;
+      border-radius: 8px;
+      margin-top: 4px;
+      box-shadow: 0 0 15px rgba(255, 0, 119, 0.3);
+    }
+    .stat-box { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+    .stat-lbl { font-size: 6px; color: #8e80b2; }
+    .stat-val { font-size: 11px; color: var(--neon-cyan); text-shadow: 0 0 6px var(--neon-cyan); }
+    .stat-val.red { color: var(--neon-pink); text-shadow: 0 0 6px var(--neon-pink); }
+
+    .respawn-btn {
+      background: linear-gradient(180deg, #ff0077 0%, #880033 100%);
+      border: 2px solid #ff77bc;
+      color: #fff;
+      padding: 12px 20px;
+      font-size: 10px;
+      border-radius: 8px;
+      cursor: pointer;
+      text-shadow: 1px 1px 2px #000;
+      box-shadow: 0 4px 0 #400018, 0 0 15px rgba(255, 0, 119, 0.6);
+      margin-top: 6px;
+      transition: all 0.1s ease;
+    }
+    .respawn-btn:hover { background: linear-gradient(180deg, #ff2a8d 0%, #aa0044 100%); transform: scale(1.04); }
+    .respawn-btn:active { transform: translateY(3px); box-shadow: 0 1px 0 #400018; }
+
+    @keyframes rektZoom {
+      0% { transform: scale(0.2) rotate(-8deg); opacity: 0; }
+      80% { transform: scale(1.15) rotate(2deg); opacity: 1; }
+      100% { transform: scale(1) rotate(0deg); }
+    }
+
+    @keyframes glitchShake {
+      0% { transform: translate(0, 0); }
+      20% { transform: translate(-2px, 2px); }
+      40% { transform: translate(2px, -1px); }
+      60% { transform: translate(-1px, -2px); }
+      80% { transform: translate(2px, 1px); }
+      100% { transform: translate(0, 0); }
+    }
+
+    /* SYSTEM LOG BAR */
+    .system-log-bar {
+      background: #000; border: 2px solid #211938; border-radius: 6px;
+      padding: 8px 12px; font-family: 'Silkscreen', monospace; font-size: 8px;
+      color: var(--neon-green); text-shadow: 0 0 4px var(--neon-green);
+    }
+
+    /* PHYSICAL CONTROL DECK */
+    .control-panel {
+      background: linear-gradient(180deg, #1c162e 0%, #0d0a17 100%);
+      border: 3px solid #33274d; border-radius: 16px; padding: 14px;
+      display: flex; flex-direction: column; gap: 12px;
+      box-shadow: inset 0 2px 4px rgba(255, 255, 255, 0.1), 0 8px 16px rgba(0,0,0,0.8);
+      position: relative;
+    }
+
+    /* WAGER SELECTOR ROW */
+    .wager-row {
+      display: flex; align-items: center; justify-content: space-between;
+      background: #080612; padding: 8px 12px; border-radius: 8px; border: 1px solid #231b36;
+    }
+    .wager-title { font-size: 8px; color: #8e80b2; }
+    .wager-buttons { display: flex; gap: 8px; }
+    .wager-btn {
+      background: linear-gradient(180deg, #281f42 0%, #120e21 100%);
+      border: 1px solid #4a3a73; color: #bbb; padding: 7px 10px; font-size: 8px;
+      border-radius: 6px; cursor: pointer; box-shadow: 0 3px 0 #000; transition: all 0.1s ease;
+    }
+    .wager-btn.active {
+      background: linear-gradient(180deg, var(--neon-purple) 0%, #680099 100%);
+      border-color: var(--neon-pink); color: #fff; box-shadow: 0 0 10px var(--neon-purple), 0 3px 0 #2a0040;
+    }
+
+    /* BGM TOGGLE BUTTON */
+    .bgm-toggle-btn {
+      background: linear-gradient(180deg, #00aa77 0%, #004422 100%);
+      border: 1px solid var(--neon-green); color: #fff; padding: 6px 10px; font-size: 7px;
+      border-radius: 6px; cursor: pointer; box-shadow: 0 0 8px var(--neon-green);
+    }
+    .bgm-toggle-btn.muted {
+      background: linear-gradient(180deg, #441122 0%, #110008 100%);
+      border-color: #772244; color: #888; box-shadow: none;
+    }
+
+    /* ARCADE HARDWARE BUTTON DECK */
+    .arcade-controls-grid {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* COIN DOOR SLOT */
+    .coin-door-mech {
+      background: linear-gradient(180deg, #2b2310 0%, #120f07 100%);
+      border: 2px solid var(--gold); border-radius: 8px; padding: 8px 10px;
+      display: flex; flex-direction: column; align-items: center; gap: 5px;
+      box-shadow: 0 5px 0 #000, 0 0 10px rgba(255, 204, 0, 0.25); cursor: pointer; min-width: 95px;
+    }
+    .coin-door-mech:active { transform: translateY(3px); box-shadow: 0 2px 0 #000; }
+    .coin-slot-opening {
+      width: 26px; height: 4px; background: #000; border: 1px solid #554411; border-radius: 2px;
+    }
+    .coin-btn-text { font-size: 6px; color: var(--gold); text-align: center; line-height: 1.2; }
+
+    /* PUSHBUTTONS */
+    .button-cluster { display: flex; gap: 6px; align-items: center; }
+    .mini-arc-btn {
+      width: 38px; height: 38px; border-radius: 50%;
+      border: 2px solid rgba(255,255,255,0.3); color: #fff; font-size: 6px;
+      display: flex; justify-content: center; align-items: center; text-align: center; cursor: pointer;
+      box-shadow: inset 0 2px 2px rgba(255,255,255,0.4), 0 4px 0 #000; transition: transform 0.08s ease;
+    }
+    .mini-arc-btn:active { transform: translateY(3px); box-shadow: 0 1px 0 #000; }
+    .mini-arc-btn.pink { background: radial-gradient(circle, #ff3399, #990047); }
+    .mini-arc-btn.purple { background: radial-gradient(circle, #b000ff, #550080); }
+    .mini-arc-btn.cyan { background: radial-gradient(circle, #00f0ff, #007780); color: #000; font-weight: bold; }
+    .mini-arc-btn.gold { background: radial-gradient(circle, #ffcc00, #886600); color: #000; font-weight: bold; }
+
+    /* MAIN ILLUMINATED BUTTON */
+    .arcade-pushbtn-main {
+      flex-grow: 1;
+      background: radial-gradient(circle at 35% 35%, #ff3399 0%, var(--neon-pink) 50%, #990047 100%);
+      border: 3px solid #ff77bc; border-radius: 12px; color: #fff;
+      padding: 16px 10px; font-size: 10px; cursor: pointer; text-shadow: 1px 1px 2px #000;
+      box-shadow: inset 0 3px 3px rgba(255, 255, 255, 0.4), inset 0 -4px 4px rgba(0,0,0,0.6), 0 7px 0 #4d0024, 0 10px 16px rgba(0,0,0,0.8), 0 0 20px rgba(255, 0, 119, 0.4);
+      transition: all 0.08s ease;
+    }
+    .arcade-pushbtn-main:hover { background: radial-gradient(circle at 35% 35%, #ff55ad 0%, #ff1a8c 50%, #b30054 100%); }
+    .arcade-pushbtn-main:active { transform: translateY(5px); box-shadow: inset 0 2px 2px rgba(255, 255, 255, 0.4), 0 2px 0 #4d0024; }
+    .arcade-pushbtn-main:disabled, .coin-door-mech.disabled { opacity: 0.35; cursor: not-allowed; transform: none !important; box-shadow: none !important; }
+
+    /* HARDWARE DECAL / STATUS LABELS */
+    .decal-bar {
+      display: flex; justify-content: space-between; align-items: center;
+      font-size: 6px; color: #776a94; font-family: 'Silkscreen', monospace; padding: 0 2px;
+    }
+    .status-leds { display: flex; gap: 8px; align-items: center; }
+    .led { display: flex; align-items: center; gap: 4px; }
+    .led-bulb { width: 6px; height: 6px; border-radius: 50%; background: #222; }
+    .led-bulb.pwr { background: var(--neon-green); box-shadow: 0 0 6px var(--neon-green); }
+    .led-bulb.net { background: #222; }
+    .led-bulb.net.on { background: var(--neon-cyan); box-shadow: 0 0 6px var(--neon-cyan); }
+
+    /* STROBE & HARD SHAKE ANIMATIONS */
+    .strobe-bg { animation: flashStrobe 0.18s ease-in-out; }
+    @keyframes flashStrobe {
+      0% { filter: brightness(2.8) contrast(2); }
+      100% { filter: brightness(1) contrast(1); }
+    }
+    .cabinet-shake { animation: hardShake 0.35s cubic-bezier(.36,.07,.19,.97) both; }
+    @keyframes hardShake {
+      10%, 90% { transform: translate3d(-6px, -2px, 0); }
+      20%, 80% { transform: translate3d(8px, 4px, 0); }
+      30%, 50%, 70% { transform: translate3d(-9px, -4px, 0); }
+      40%, 60% { transform: translate3d(9px, 2px, 0); }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="cabinet-wrapper" id="cabinet">
+    <div class="rivet tl"></div>
+    <div class="rivet tr"></div>
+    <div class="rivet bl"></div>
+    <div class="rivet br"></div>
+
+    <div class="marquee-housing">
+      <div class="marquee-title">TWITCHTRAP</div>
+      <div class="marquee-sub">✦ $TWITCHTRAP DEGEN ARCADE ✦</div>
+    </div>
+
+    <div class="crt-housing" id="crtHousing">
+      <div class="vhs-glitch-bar" id="vhsBar"></div>
+      <div class="hud-header">
+        <div class="hud-card">
+          <span class="hud-lbl">JACKPOT</span>
+          <span class="hud-val gold" id="jackpotVal">0.100 SOL</span>
+        </div>
+        <div class="hud-card">
+          <span class="hud-lbl">MULTIPLIER</span>
+          <span class="hud-val cyan" id="multVal">x1.00</span>
+        </div>
+        <div class="hud-card">
+          <span class="hud-lbl">TIMER</span>
+          <span class="hud-val pink" id="timerVal">00.000s</span>
+        </div>
+      </div>
+
+      <canvas id="gameCanvas" width="600" height="310"></canvas>
+
+      <!-- ATTRACT MODE OVERLAY -->
+      <div class="attract-screen" id="attractScreen">
+        <div class="jackpot-banner">★ JACKPOT: <span id="overlayJackpot">12,345,678 $TRAP</span> ★</div>
+        
+        <div class="attract-hero">
+          <canvas id="memeCanvas" width="340" height="75"></canvas>
+        </div>
+
+        <div class="leaderboard-table">
+          <div style="color:var(--gold); font-size:8px; text-align:center; margin-bottom:2px;">★ HALL OF SHAME ★</div>
+          <div class="lb-row top"><span>1. DEGEN_KING</span><span>9,999,999 $TRAP</span></div>
+          <div class="lb-row"><span>2. RUG_PULLER</span><span>4,206,900 $TRAP</span></div>
+          <div class="lb-row"><span>3. LIQUIDATED</span><span>2,694,200 $TRAP</span></div>
+          <div class="lb-row"><span>4. NGMI_4LIFE</span><span>1,337,000 $TRAP</span></div>
+          <div class="lb-row user"><span>5. PAPERHANDS</span><span>696,969 $TRAP</span></div>
+        </div>
+      </div>
+
+      <!-- DRAMATIC IN-SCREEN GAME OVER / LIQUIDATED SPLASH MODAL -->
+      <div class="death-splash" id="deathSplash">
+        <div class="death-title" id="deathTitle">💥 LIQUIDATED! 💥</div>
+        <div class="death-subtitle" id="deathSubtitle">SKILL ISSUE! YOUR HANDS ARE MADE OF WET TISSUE PAPER 🤡</div>
+
+        <div class="death-stats-card">
+          <div class="stat-box">
+            <span class="stat-lbl">SURVIVED</span>
+            <span class="stat-val" id="deathTime">0.000s</span>
+          </div>
+          <div class="stat-box">
+            <span class="stat-lbl">PEAK MULT</span>
+            <span class="stat-val" id="deathMult">x1.00</span>
+          </div>
+          <div class="stat-box">
+            <span class="stat-lbl">LOST</span>
+            <span class="stat-val red" id="deathWager">0.05 SOL</span>
+          </div>
+        </div>
+
+        <button class="respawn-btn" id="respawnBtn">TRY AGAIN BRICKHEAD 🔄</button>
+      </div>
+
+    </div>
+
+    <div class="system-log-bar" id="sysLog">> SYSTEM READY. Insert SOL or Connect Wallet to play.</div>
+
+    <div class="control-panel">
+      <div class="wager-row">
+        <span class="wager-title">WAGER TIER:</span>
+        <div class="wager-buttons">
+          <button class="wager-btn active" onclick="setWager(0.05, this)">0.05 SOL</button>
+          <button class="wager-btn" onclick="setWager(0.10, this)">0.10 SOL</button>
+          <button class="wager-btn" onclick="setWager(0.50, this)">0.50 SOL</button>
+          <button class="wager-btn" onclick="setWager(1.00, this)">1.00 SOL</button>
+        </div>
+        <button class="bgm-toggle-btn" id="bgmToggleBtn" onclick="toggleBGM()">AUDIO: ON</button>
+      </div>
+
+      <div class="arcade-controls-grid">
+        <div class="coin-door-mech" id="connectBtn">
+          <div class="coin-slot-opening"></div>
+          <div class="coin-btn-text">INSERT SOL<br><span style="font-size:5px; color:#aaa;">(CONNECT)</span></div>
+        </div>
+
+        <div class="button-cluster">
+          <div class="mini-arc-btn pink" onclick="triggerDistractionSFX('BET!')">BET</div>
+          <div class="mini-arc-btn purple" onclick="triggerDistractionSFX('DEGEN!')">DEGEN</div>
+          <div class="mini-arc-btn cyan" onclick="triggerDistractionSFX('HYPE!')">HYPE</div>
+          <div class="mini-arc-btn gold" onclick="triggerDistractionSFX('BOOST!')">BOOST</div>
+        </div>
+
+        <button class="arcade-pushbtn-main" id="playBtn" disabled>LOCK IN & PLAY</button>
+      </div>
+
+      <div class="decal-bar">
+        <span>⚠ DEGEN INSIDE // NOT FINANCIAL ADVICE</span>
+        <div class="status-leds">
+          <div class="led"><div class="led-bulb pwr"></div>PWR</div>
+          <div class="led"><div class="led-bulb net" id="ledNet"></div>NET</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const sysLog = document.getElementById('sysLog');
+    const connectBtn = document.getElementById('connectBtn');
+    const playBtn = document.getElementById('playBtn');
+    const timerDisplay = document.getElementById('timerVal');
+    const multDisplay = document.getElementById('multVal');
+    const jackpotDisplay = document.getElementById('jackpotVal');
+    const attractScreen = document.getElementById('attractScreen');
+    const deathSplash = document.getElementById('deathSplash');
+    const deathTitle = document.getElementById('deathTitle');
+    const deathSubtitle = document.getElementById('deathSubtitle');
+    const deathTime = document.getElementById('deathTime');
+    const deathMult = document.getElementById('deathMult');
+    const deathWager = document.getElementById('deathWager');
+    const respawnBtn = document.getElementById('respawnBtn');
+    const ledNet = document.getElementById('ledNet');
+    const cabinet = document.getElementById('cabinet');
+    const vhsBar = document.getElementById('vhsBar');
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+    const bgmToggleBtn = document.getElementById('bgmToggleBtn');
+
+    // --- MOCKING / TROLLING INSULTS LIST ---
+    const MOCK_MESSAGES = [
+      "SKILL ISSUE 🤡 HANDS MADE OF WET TISSUE PAPER!",
+      "NGMI! BUSTED HARDER THAN A SHITCOIN AT 3AM!",
+      "PARKINSONS OR JUST WEAK INTENT? 💀",
+      "DEV THANKS YOU FOR THE FREE SOL DONATION 💸",
+      "GET LIQUIDATED IDIOT! GO BACK TO DEMO TRADING!",
+      "HANDS SHAKIER THAN AN ALCOHOLIC ON WEDNESDAY 🍷",
+      "REKT! CALL YOUR MOM AND ASK FOR AN ADVANCE 📞",
+      "A GOLD-FISH HAS BETTER MOTOR CONTROL THAN THIS 🐠"
+    ];
+
+    const START_FAIL_MESSAGES = [
+      "CAN'T EVEN STAY IN THE BOX FOR 3 SECONDS? 🤡",
+      "FAILED AT STEP 0! RE-EVALUATE YOUR LIFE CHOICES 💀",
+      "CURSOR DRIFTING LIKE YOUR ATTENTION SPAN!",
+      "BLIND OR JUST LAGGY? CENTER THE TARGET!"
+    ];
+
+    // --- MEME PIXEL ART ENGINE ---
+    const memeCanvas = document.getElementById('memeCanvas');
+    const mctx = memeCanvas.getContext('2d');
+    function drawMemePixelArt() {
+      mctx.clearRect(0, 0, memeCanvas.width, memeCanvas.height);
+      
+      // Wojak
+      mctx.fillStyle = "#e0c0a0"; mctx.fillRect(15, 10, 35, 45);
+      mctx.fillStyle = "#000000"; mctx.fillRect(22, 22, 6, 4); mctx.fillRect(36, 22, 6, 4);
+      mctx.fillStyle = "#00f0ff"; mctx.fillRect(22, 28, 4, 18); mctx.fillRect(36, 28, 4, 18);
+      mctx.fillStyle = "#ff0000"; mctx.fillRect(26, 42, 12, 3);
+
+      // Pepe
+      mctx.fillStyle = "#22b14c"; mctx.fillRect(120, 10, 45, 45);
+      mctx.fillStyle = "#000"; mctx.fillRect(120, 20, 45, 12);
+      mctx.fillStyle = "#ff0077"; mctx.fillRect(130, 38, 25, 5);
+
+      // Doge
+      mctx.fillStyle = "#e5a73c"; mctx.fillRect(250, 10, 45, 45);
+      mctx.fillStyle = "#000"; mctx.fillRect(250, 20, 45, 12);
+      mctx.fillStyle = "#fff"; mctx.fillRect(255, 22, 10, 8);
+
+      mctx.font = '7px "Press Start 2P"';
+      mctx.fillStyle = '#ffcc00';
+      mctx.textAlign = 'center';
+      mctx.fillText("ATTRACT MODE", 170, 70);
+    }
+    drawMemePixelArt();
+
+    let playerWallet = null;
+    let selectedWager = 0.05;
+    const BASE_JACKPOT = 0.100;
+    let testRunsAccumulator = 0;
+
+    function setWager(amt, btn) {
+      document.querySelectorAll('.wager-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      selectedWager = amt;
+      log(`Wager tier updated: ${selectedWager} SOL`);
+    }
+
+    function renderJackpot() {
+      const current = BASE_JACKPOT + testRunsAccumulator;
+      jackpotDisplay.innerText = `${current.toFixed(3)} SOL`;
+    }
+
+    function log(msg) {
+      sysLog.innerText = `> ${msg}`;
+    }
+
+    // --- SYNTH & PROCEDURAL BGM ENGINE ---
+    let audioCtx = null;
+    let runOsc = null;
+    let runGain = null;
+    let bgmMasterGain = null;
+    let bgmIsPlaying = false;
+    let bgmMuted = false;
+    let bgmStep = 0;
+    let bgmInterval = null;
+
+    // Frequencies for Synthwave/Chiptune Bass & Lead
+    const NOTES = {
+      A1: 55.00, C2: 65.41, D2: 73.42, E2: 82.41, F2: 87.31, G2: 98.00,
+      A2: 110.00, C3: 130.81, D3: 146.83, E3: 164.81, F3: 174.61, G3: 196.00,
+      A3: 220.00, C4: 261.63, E4: 329.63, G4: 392.00, A4: 440.00
+    };
+
+    // 16-Step Retro Sequences
+    const BASS_SEQ = [
+      NOTES.A1, NOTES.A1, NOTES.A2, NOTES.A1,  NOTES.C2, NOTES.C2, NOTES.C3, NOTES.C2,
+      NOTES.D2, NOTES.D2, NOTES.D3, NOTES.D2,  NOTES.F2, NOTES.F2, NOTES.E2, NOTES.E2
+    ];
+
+    const ARP_SEQ = [
+      NOTES.A3, NOTES.C4, NOTES.E4, NOTES.A4,  NOTES.C4, NOTES.E4, NOTES.A4, NOTES.C4,
+      NOTES.D3, NOTES.F3, NOTES.A3, NOTES.D4,  NOTES.E3, NOTES.G3, NOTES.B3, NOTES.E4
+    ];
+
+    function initAudio() {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        bgmMasterGain = audioCtx.createGain();
+        bgmMasterGain.gain.setValueAtTime(bgmMuted ? 0.0 : 0.18, audioCtx.currentTime);
+        bgmMasterGain.connect(audioCtx.destination);
+      }
+      if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+      if (!bgmIsPlaying) {
+        startArcadeBGM();
+      }
+    }
+
+    // Unlock audio context on any user click across page
+    window.addEventListener('click', () => { initAudio(); }, { once: false });
+
+    function toggleBGM() {
+      initAudio();
+      bgmMuted = !bgmMuted;
+      if (bgmMasterGain) {
+        bgmMasterGain.gain.setValueAtTime(bgmMuted ? 0.0 : 0.18, audioCtx.currentTime);
+      }
+      if (bgmMuted) {
+        bgmToggleBtn.innerText = "AUDIO: MUTE";
+        bgmToggleBtn.classList.add('muted');
+      } else {
+        bgmToggleBtn.innerText = "AUDIO: ON";
+        bgmToggleBtn.classList.remove('muted');
+      }
+    }
+
+    // Noise Generator for Snare / Hi-Hats
+    function createNoiseBuffer() {
+      if (!audioCtx) return null;
+      const bufferSize = audioCtx.sampleRate * 0.1;
+      const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+      const output = buffer.getChannelData(0);
+      for (let i = 0; i < bufferSize; i++) {
+        output[i] = Math.random() * 2 - 1;
+      }
+      return buffer;
+    }
+
+    let noiseBuffer = null;
+
+    function startArcadeBGM() {
+      if (bgmIsPlaying) return;
+      bgmIsPlaying = true;
+      noiseBuffer = createNoiseBuffer();
+
+      // 135 BPM 16th-note clock (~111ms per step)
+      bgmStep = 0;
+      bgmInterval = setInterval(playBGMStep, 111);
+    }
+
+    function playBGMStep() {
+      if (!audioCtx || !bgmIsPlaying || audioCtx.state === 'suspended') return;
+      const t = audioCtx.currentTime;
+
+      // 1. KICK DRUM (Every 4th step)
+      if (bgmStep % 4 === 0) {
+        const kOsc = audioCtx.createOscillator();
+        const kGain = audioCtx.createGain();
+        kOsc.frequency.setValueAtTime(140, t);
+        kOsc.frequency.exponentialRampToValueAtTime(0.01, t + 0.12);
+        kGain.gain.setValueAtTime(0.7, t);
+        kGain.gain.exponentialRampToValueAtTime(0.001, t + 0.12);
+        kOsc.connect(kGain); kGain.connect(bgmMasterGain);
+        kOsc.start(t); kOsc.stop(t + 0.12);
+      }
+
+      // 2. SNARE DRUM (On steps 4 & 12)
+      if (bgmStep % 8 === 4 && noiseBuffer) {
+        const nSrc = audioCtx.createBufferSource();
+        nSrc.buffer = noiseBuffer;
+        const nFilter = audioCtx.createBiquadFilter();
+        nFilter.type = 'highpass';
+        nFilter.frequency.setValueAtTime(1000, t);
+        const nGain = audioCtx.createGain();
+        nGain.gain.setValueAtTime(0.35, t);
+        nGain.gain.exponentialRampToValueAtTime(0.001, t + 0.12);
+        nSrc.connect(nFilter); nFilter.connect(nGain); nGain.connect(bgmMasterGain);
+        nSrc.start(t); nSrc.stop(t + 0.12);
+      }
+
+      // 3. HI-HAT (Every 2nd step)
+      if (bgmStep % 2 === 1 && noiseBuffer) {
+        const hSrc = audioCtx.createBufferSource();
+        hSrc.buffer = noiseBuffer;
+        const hFilter = audioCtx.createBiquadFilter();
+        hFilter.type = 'highpass';
+        hFilter.frequency.setValueAtTime(6000, t);
+        const hGain = audioCtx.createGain();
+        hGain.gain.setValueAtTime(0.12, t);
+        hGain.gain.exponentialRampToValueAtTime(0.001, t + 0.04);
+        hSrc.connect(hFilter); hFilter.connect(hGain); hGain.connect(bgmMasterGain);
+        hSrc.start(t); hSrc.stop(t + 0.04);
+      }
+
+      // 4. CHIPTUNE BASS (Pulse / Saw)
+      const bFreq = BASS_SEQ[bgmStep % BASS_SEQ.length];
+      if (bFreq) {
+        const bOsc = audioCtx.createOscillator();
+        const bGain = audioCtx.createGain();
+        bOsc.type = 'sawtooth';
+        bOsc.frequency.setValueAtTime(bFreq, t);
+        bGain.gain.setValueAtTime(0.28, t);
+        bGain.gain.exponentialRampToValueAtTime(0.01, t + 0.09);
+        bOsc.connect(bGain); bGain.connect(bgmMasterGain);
+        bOsc.start(t); bOsc.stop(t + 0.09);
+      }
+
+      // 5. SYNTH LEAD ARP (Square wave)
+      const aFreq = ARP_SEQ[bgmStep % ARP_SEQ.length];
+      if (aFreq) {
+        const aOsc = audioCtx.createOscillator();
+        const aGain = audioCtx.createGain();
+        aOsc.type = 'square';
+        aOsc.frequency.setValueAtTime(aFreq, t);
+        aGain.gain.setValueAtTime(0.1, t);
+        aGain.gain.exponentialRampToValueAtTime(0.001, t + 0.08);
+        aOsc.connect(aGain); aGain.connect(bgmMasterGain);
+        aOsc.start(t); aOsc.stop(t + 0.08);
+      }
+
+      bgmStep = (bgmStep + 1) % 16;
+    }
+
+    // --- GAME SFX ENGINE ---
+    function playTickSound(isGo = false) {
+      if (!audioCtx) return;
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = isGo ? 'square' : 'triangle';
+      osc.frequency.setValueAtTime(isGo ? 880 : 440, audioCtx.currentTime);
+      gain.gain.setValueAtTime(0.12, audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.1);
+      osc.connect(gain); gain.connect(audioCtx.destination);
+      osc.start(); osc.stop(audioCtx.currentTime + 0.1);
+    }
+
+    function startRunSynth() {
+      if (!audioCtx) return;
+      runOsc = audioCtx.createOscillator();
+      runGain = audioCtx.createGain();
+      runOsc.type = 'sawtooth';
+      runOsc.frequency.setValueAtTime(120, audioCtx.currentTime);
+      runGain.gain.setValueAtTime(0.05, audioCtx.currentTime);
+      runOsc.connect(runGain);
+      runGain.connect(audioCtx.destination);
+      runOsc.start();
+    }
+
+    function updateRunPitch(mult) {
+      if (runOsc && audioCtx) {
+        const freq = 120 + (mult * 95);
+        runOsc.frequency.setTargetAtTime(freq, audioCtx.currentTime, 0.1);
+      }
+    }
+
+    function stopRunSynth(isDeath = false) {
+      if (runGain && audioCtx) {
+        runGain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.08);
+        setTimeout(() => { if (runOsc) { runOsc.stop(); runOsc.disconnect(); } }, 90);
+      }
+      if (isDeath && audioCtx) {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(450, audioCtx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(20, audioCtx.currentTime + 0.5);
+        gain.gain.setValueAtTime(0.35, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.5);
+        osc.connect(gain); gain.connect(audioCtx.destination);
+        osc.start(); osc.stop(audioCtx.currentTime + 0.5);
+      }
+    }
+
+    // --- VISUAL DISTRACTION ENGINE ---
+    let distractions = [];
+    const DISTRACTION_WORDS = ["NGMI!", "RUG PULL?", "BUY DIP!", "PUMP IT!", "FEELS BAD", "LIQUIDATED?", "HOLD!", "100X!", "JEOD!"];
+
+    function spawnDistraction() {
+      distractions.push({
+        x: Math.random() * (canvas.width - 120) + 20,
+        y: Math.random() * (canvas.height - 40) + 30,
+        text: DISTRACTION_WORDS[Math.floor(Math.random() * DISTRACTION_WORDS.length)],
+        color: Math.random() > 0.5 ? '#ff0077' : '#00f0ff',
+        size: Math.floor(Math.random() * 12) + 12,
+        alpha: 1.0,
+        vx: (Math.random() - 0.5) * 4,
+        vy: (Math.random() - 0.5) * 4
+      });
+    }
+
+    function renderAndUpdateDistractions() {
+      for (let i = distractions.length - 1; i >= 0; i--) {
+        let d = distractions[i];
+        d.x += d.vx; d.y += d.vy; d.alpha -= 0.015;
+        if (d.alpha <= 0) { distractions.splice(i, 1); continue; }
+
+        ctx.save();
+        ctx.globalAlpha = d.alpha;
+        ctx.font = `${d.size}px "Press Start 2P"`;
+        ctx.fillStyle = d.color;
+        ctx.shadowBlur = 10; ctx.shadowColor = d.color;
+        ctx.fillText(d.text, d.x, d.y);
+        ctx.restore();
+      }
+    }
+
+    function triggerDistractionSFX(msg) {
+      initAudio();
+      log(`BUTTON PRESSED: ${msg}`);
+      cabinet.classList.remove('strobe-bg');
+      void cabinet.offsetWidth;
+      cabinet.classList.add('strobe-bg');
+    }
+
+    // --- PARTICLE ENGINE ---
+    let particles = [];
+    function spawnParticles(x, y) {
+      for (let i = 0; i < 2; i++) {
+        particles.push({
+          x: x, y: y,
+          vx: (Math.random() - 0.5) * 2,
+          vy: (Math.random() - 0.5) * 2,
+          alpha: 1.0,
+          color: Math.random() > 0.5 ? '#ff0077' : '#00f0ff',
+          size: Math.random() * 3 + 1
+        });
+      }
+    }
+
+    function renderParticles() {
+      for (let i = particles.length - 1; i >= 0; i--) {
+        let p = particles[i];
+        p.x += p.vx; p.y += p.vy; p.alpha -= 0.04;
+        if (p.alpha <= 0) { particles.splice(i, 1); continue; }
+        ctx.save();
+        ctx.globalAlpha = p.alpha;
+        ctx.fillStyle = p.color;
+        ctx.beginPath(); ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2); ctx.fill();
+        ctx.restore();
+      }
+    }
+
+    // --- SHOW IN-SCREEN DEATH SPLASH MODAL ---
+    function triggerDeathSplash(title, sub, time, mult, wager) {
+      deathTitle.innerText = title;
+      deathSubtitle.innerText = sub;
+      deathTime.innerText = `${time.toFixed(3)}s`;
+      deathMult.innerText = `x${mult}`;
+      deathWager.innerText = `${wager} SOL`;
+
+      deathSplash.style.display = 'flex';
+      
+      // Intense Cabinet Tremor & Strobe Flash
+      cabinet.classList.remove('strobe-bg', 'cabinet-shake');
+      void cabinet.offsetWidth;
+      cabinet.classList.add('strobe-bg', 'cabinet-shake');
+    }
+
+    respawnBtn.addEventListener('click', () => {
+      deathSplash.style.display = 'none';
+      attractScreen.style.display = 'flex';
+      playBtn.disabled = false;
+      log("CREDITS STILL ACTIVE. Lock in and try again!");
+    });
+
+    // --- WALLET CONNECTOR ---
+    async function connectPhantom() {
+      initAudio();
+      const provider = window.solana || (window.phantom ? window.phantom.solana : null);
+      if (!provider) { alert("Phantom wallet not found!"); return; }
+      try {
+        const response = await provider.connect();
+        playerWallet = response.publicKey.toString();
+        const shortAddr = `${playerWallet.slice(0, 4)}...${playerWallet.slice(-4)}`;
+        log(`SOL ACCEPTED: ${shortAddr}`);
+        connectBtn.querySelector('.coin-btn-text').innerHTML = `CREDIT ON<br><span style="font-size:5px; color:#00ff66;">${shortAddr}</span>`;
+        connectBtn.classList.add('disabled');
+        playBtn.disabled = false;
+        ledNet.classList.add('on');
+      } catch (err) {
+        log(`CREDIT REJECTED`);
+      }
+    }
+    connectBtn.addEventListener('click', connectPhantom);
+
+    // --- GAME ENGINE ---
+    let gameState = 'IDLE';
+    let countdownRemaining = 3;
+    let countdownStart = 0;
+    let runStartTime = 0;
+    let lastTickSec = 4;
+    let lastDistractTime = 0;
+    let box = { x: 230, y: 90, size: 110 };
+    let cursor = { x: -100, y: -100 };
+
+    canvas.addEventListener('mousemove', (e) => {
+      const rect = canvas.getBoundingClientRect();
+      cursor.x = e.clientX - rect.left;
+      cursor.y = e.clientY - rect.top;
+      if (gameState === 'ACTIVE') spawnParticles(cursor.x, cursor.y);
+    });
+
+    playBtn.addEventListener('click', () => {
+      if (!playerWallet) return;
+      initAudio();
+
+      testRunsAccumulator += selectedWager;
+      renderJackpot();
+
+      gameState = 'COUNTDOWN';
+      countdownStart = performance.now();
+      lastTickSec = 4;
+      distractions = [];
+      playBtn.disabled = true;
+      attractScreen.style.display = 'none';
+      deathSplash.style.display = 'none';
+      log(`LOCK-IN CONFIRMED (+${selectedWager} SOL). Center target in box!`);
+      requestAnimationFrame(gameLoop);
+    });
+
+    function gameLoop(timestamp) {
+      if (gameState === 'IDLE') return;
+
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      // Cyber Grid
+      ctx.strokeStyle = '#140d28'; ctx.lineWidth = 1;
+      for (let x = 0; x < canvas.width; x += 20) {
+        ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, canvas.height); ctx.stroke();
+      }
+      for (let y = 0; y < canvas.height; y += 20) {
+        ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(canvas.width, y); ctx.stroke();
+      }
+
+      // --- COUNTDOWN WARM-UP ---
+      if (gameState === 'COUNTDOWN') {
+        const elapsedPrep = (timestamp - countdownStart) / 1000;
+        countdownRemaining = Math.max(0, 3 - elapsedPrep);
+
+        const currentSec = Math.ceil(countdownRemaining);
+        if (currentSec !== lastTickSec && currentSec > 0) {
+          playTickSound(false);
+          lastTickSec = currentSec;
+        }
+
+        box.size = 110;
+        box.x = (canvas.width / 2) - (box.size / 2);
+        box.y = (canvas.height / 2) - (box.size / 2);
+
+        const isInside = (cursor.x >= box.x && cursor.x <= box.x + box.size && cursor.y >= box.y && cursor.y <= box.y + box.size);
+
+        ctx.strokeStyle = isInside ? '#00ff66' : '#ffcc00';
+        ctx.lineWidth = 3; ctx.shadowBlur = 12; ctx.shadowColor = ctx.strokeStyle;
+        ctx.strokeRect(box.x, box.y, box.size, box.size);
+        ctx.shadowBlur = 0;
+
+        const cx = box.x + box.size / 2, cy = box.y + box.size / 2;
+        ctx.strokeStyle = isInside ? '#00ff66' : '#ffcc00'; ctx.lineWidth = 1;
+        ctx.beginPath(); ctx.arc(cx, cy, 12, 0, Math.PI * 2); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(cx - 18, cy); ctx.lineTo(cx + 18, cy); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(cx, cy - 18); ctx.lineTo(cx, cy + 18); ctx.stroke();
+
+        ctx.fillStyle = '#ffffff'; ctx.font = '12px "Press Start 2P"'; ctx.textAlign = 'center';
+        ctx.fillText(`GET READY: ${countdownRemaining.toFixed(1)}s`, canvas.width / 2, 40);
+
+        ctx.font = '8px "Press Start 2P"'; ctx.fillStyle = isInside ? '#00ff66' : '#ffcc00';
+        ctx.fillText(isInside ? "TARGET LOCKED!" : "HOLD CURSOR IN BOX", canvas.width / 2, canvas.height - 20);
+
+        ctx.fillStyle = '#ff0077';
+        ctx.beginPath(); ctx.arc(cursor.x, cursor.y, 4, 0, Math.PI * 2); ctx.fill();
+
+        if (countdownRemaining <= 0) {
+          if (!isInside) {
+            gameState = 'IDLE';
+            stopRunSynth(true);
+            const randMock = START_FAIL_MESSAGES[Math.floor(Math.random() * START_FAIL_MESSAGES.length)];
+            triggerDeathSplash("❌ START FAILED!", randMock, 0, "1.00", selectedWager);
+            log("START FAILED: Outside safe zone!");
+            return;
+          }
+          playTickSound(true);
+          gameState = 'ACTIVE';
+          runStartTime = performance.now();
+          startRunSynth();
+          log("RUN ACTIVE! Avoid box boundaries!");
+        }
+
+        requestAnimationFrame(gameLoop);
+        return;
+      }
+
+      // --- ACTIVE RUN ---
+      if (gameState === 'ACTIVE') {
+        const elapsed = (timestamp - runStartTime) / 1000;
+        timerDisplay.innerText = elapsed.toFixed(3) + 's';
+
+        const currentMult = (1.0 + (elapsed * 0.22)).toFixed(2);
+        multDisplay.innerText = `x${currentMult}`;
+
+        updateRunPitch(parseFloat(currentMult));
+
+        // DISTRACTION TRIGGER LOGIC
+        if (timestamp - lastDistractTime > 800 - Math.min(elapsed * 25, 500)) {
+          spawnDistraction();
+          if (Math.random() < 0.25) {
+            vhsBar.style.top = Math.random() * 250 + 'px';
+            vhsBar.style.opacity = '1';
+            setTimeout(() => { vhsBar.style.opacity = '0'; }, 150);
+          }
+          lastDistractTime = timestamp;
+        }
+
+        const ramp = Math.min(elapsed / 30, 1.0);
+        box.size = Math.max(45, 110 - (ramp * 65));
+
+        const speed = 0.6 + (ramp * 2.1);
+        const ampX = 70 + (ramp * 80);
+        const ampY = 40 + (ramp * 50);
+
+        const cx = (canvas.width / 2) - (box.size / 2);
+        const cy = (canvas.height / 2) - (box.size / 2);
+
+        box.x = cx + Math.sin(elapsed * speed) * ampX;
+        box.y = cy + Math.cos(elapsed * speed * 1.3) * ampY;
+
+        renderAndUpdateDistractions();
+
+        ctx.strokeStyle = '#00f0ff'; ctx.lineWidth = 2; ctx.shadowBlur = 12; ctx.shadowColor = '#00f0ff';
+        ctx.strokeRect(box.x, box.y, box.size, box.size);
+
+        const boxCx = box.x + box.size / 2, boxCy = box.y + box.size / 2;
+        ctx.lineWidth = 1;
+        ctx.beginPath(); ctx.arc(boxCx, boxCy, 8, 0, Math.PI * 2); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(boxCx - 12, boxCy); ctx.lineTo(boxCx + 12, boxCy); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(boxCx, boxCy - 12); ctx.lineTo(boxCx, boxCy + 12); ctx.stroke();
+        ctx.shadowBlur = 0;
+
+        ctx.fillStyle = '#ff0077'; ctx.shadowBlur = 8; ctx.shadowColor = '#ff0077';
+        ctx.beginPath(); ctx.arc(cursor.x, cursor.y, 4, 0, Math.PI * 2); ctx.fill();
+        ctx.shadowBlur = 0;
+
+        renderParticles();
+
+        const isOutOfBounds = (cursor.x < box.x || cursor.x > box.x + box.size || cursor.y < box.y || cursor.y > box.y + box.size);
+
+        if (isOutOfBounds) {
+          gameState = 'IDLE';
+          stopRunSynth(true);
+          const randMock = MOCK_MESSAGES[Math.floor(Math.random() * MOCK_MESSAGES.length)];
+          triggerDeathSplash("💥 LIQUIDATED! 💥", randMock, elapsed, currentMult, selectedWager);
+          log(`LIQUIDATED! Survived ${elapsed.toFixed(2)}s at ${currentMult}x`);
+          return;
+        }
+
+        requestAnimationFrame(gameLoop);
+      }
+    }
+
+    renderJackpot();
+  </script>
+</body>
+</html>

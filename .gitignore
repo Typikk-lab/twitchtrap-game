@@ -1,0 +1,9 @@
+.anchor/
+node_modules/
+target/
+.env
+**/*.json
+!package.json
+!package-lock.json
+!tsconfig.json
+!Anchor.toml
