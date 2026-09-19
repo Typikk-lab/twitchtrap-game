@@ -7,3 +7,4 @@ target/
 !package-lock.json
 !tsconfig.json
 !Anchor.toml
+*.exe
