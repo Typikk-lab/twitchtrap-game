@@ -601,7 +601,7 @@
       sysLog.innerText = `> ${msg}`;
     }
 
-    // ====================== AUDIO ENGINE (KEPT FULLY INTACT) ======================
+    // ====================== AUDIO ENGINE ======================
     let audioCtx = null;
     let runOsc = null;
     let runGain = null;
@@ -786,7 +786,7 @@
       }
     }
 
-    // ====================== VISUAL ENGINES (KEPT) ======================
+    // ====================== VISUAL ENGINES ======================
     let distractions = [];
     const DISTRACTION_WORDS = ["NGMI!", "RUG PULL?", "BUY DIP!", "PUMP IT!", "FEELS BAD", "LIQUIDATED?", "HOLD!", "100X!", "JEOD!"];
 
@@ -873,14 +873,18 @@
       log("READY FOR NEXT RUN.");
     });
 
-    // ====================== WALLET + REAL PAYMENT ======================
-    async function connectPhantom() {
+    // ====================== WALLET + PAYMENT ======================
+    async function connectWallet() {
       initAudio();
-      const provider = window.solana || window.phantom?.solana;
+
+      // Improved multi-wallet support
+      const provider = window.solana || window.phantom?.solana || window.solflare?.solana || window.backpack?.solana;
+
       if (!provider) {
-        alert("Phantom wallet not found!");
+        alert("No Solana wallet found!\n\nPlease open this site inside Phantom or Solflare browser, or install a wallet.");
         return;
       }
+
       try {
         const response = await provider.connect();
         playerWallet = response.publicKey.toString();
@@ -888,15 +892,17 @@
 
         const shortAddr = `${playerWallet.slice(0, 4)}...${playerWallet.slice(-4)}`;
         log(`SOL ACCEPTED: ${shortAddr}`);
+        
         connectBtn.querySelector('.coin-btn-text').innerHTML = `CREDIT ON<br><span style="font-size:5px; color:#00ff66;">${shortAddr}</span>`;
         connectBtn.classList.add('disabled');
         playBtn.disabled = false;
         ledNet.classList.add('on');
       } catch (err) {
+        console.error(err);
         log(`CREDIT REJECTED`);
       }
     }
-    connectBtn.addEventListener('click', connectPhantom);
+    connectBtn.addEventListener('click', connectWallet);
 
     // ====================== GAME ENGINE ======================
     let gameState = 'IDLE';
@@ -926,7 +932,7 @@
       log(`PROCESSING ${selectedWager} SOL PAYMENT...`);
 
       try {
-        const provider = window.solana || window.phantom?.solana;
+        const provider = window.solana || window.phantom?.solana || window.solflare?.solana || window.backpack?.solana;
         const fromPubkey = new solanaWeb3.PublicKey(playerWallet);
         const devPubkey = new solanaWeb3.PublicKey(DEV_WALLET);
         const jackpotPubkey = new solanaWeb3.PublicKey(JACKPOT_WALLET);
@@ -979,7 +985,7 @@
         attractScreen.style.display = 'none';
         deathSplash.style.display = 'none';
 
-        // Pointer Lock
+        // Pointer Lock (desktop)
         canvas.requestPointerLock = canvas.requestPointerLock || canvas.mozRequestPointerLock;
         if (canvas.requestPointerLock) canvas.requestPointerLock();
 
@@ -1134,4 +1140,4 @@
     renderJackpot();
   </script>
 </body>
-            </html>
+          </html>
