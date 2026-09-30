@@ -515,7 +515,7 @@
     // ====================== CONFIG ======================
     const DEV_WALLET = "CYAEcKyfcojTd8LNJK7fPRYJNrbEbEbQhKhHGRrd7K32";
     const JACKPOT_WALLET = "HHsroJhqTLnx8R3XCnFMqb73DMp9S3o7QbKywafBr1Mp";
-    const RPC_URL = "https://api.devnet.solana.com"; // Devnet for testing
+    const RPC_URL = "https://api.devnet.solana.com";
 
     const sysLog = document.getElementById('sysLog');
     const connectBtn = document.getElementById('connectBtn');
@@ -556,7 +556,6 @@
       "BLIND OR JUST LAGGY? CENTER THE TARGET!"
     ];
 
-    // Meme canvas
     const memeCanvas = document.getElementById('memeCanvas');
     const mctx = memeCanvas.getContext('2d');
     function drawMemePixelArt() {
@@ -601,7 +600,7 @@
       sysLog.innerText = `> ${msg}`;
     }
 
-    // ====================== AUDIO ENGINE ======================
+    // ====================== AUDIO ======================
     let audioCtx = null;
     let runOsc = null;
     let runGain = null;
@@ -786,7 +785,7 @@
       }
     }
 
-    // ====================== VISUAL ENGINES ======================
+    // ====================== VISUALS ======================
     let distractions = [];
     const DISTRACTION_WORDS = ["NGMI!", "RUG PULL?", "BUY DIP!", "PUMP IT!", "FEELS BAD", "LIQUIDATED?", "HOLD!", "100X!", "JEOD!"];
 
@@ -873,15 +872,27 @@
       log("READY FOR NEXT RUN.");
     });
 
-    // ====================== WALLET + PAYMENT ======================
+    // ====================== WALLET CONNECTION (IMPROVED) ======================
     async function connectWallet() {
       initAudio();
 
-      // Improved multi-wallet support
-      const provider = window.solana || window.phantom?.solana || window.solflare?.solana || window.backpack?.solana;
+      // Wait for mobile wallets to inject
+      await new Promise(resolve => setTimeout(resolve, 400));
+
+      let provider = null;
+
+      if (window.solana) {
+        provider = window.solana;
+      } else if (window.phantom?.solana) {
+        provider = window.phantom.solana;
+      } else if (window.solflare?.solana) {
+        provider = window.solflare.solana;
+      } else if (window.backpack?.solana) {
+        provider = window.backpack.solana;
+      }
 
       if (!provider) {
-        alert("No Solana wallet found!\n\nPlease open this site inside Phantom or Solflare browser, or install a wallet.");
+        alert("No Solana wallet found!\n\nPlease open this site inside the Phantom or Solflare app browser.");
         return;
       }
 
@@ -938,12 +949,11 @@
         const jackpotPubkey = new solanaWeb3.PublicKey(JACKPOT_WALLET);
 
         const totalLamports = Math.floor(selectedWager * solanaWeb3.LAMPORTS_PER_SOL);
-        const jackpotLamports = Math.floor(totalLamports * 0.10); // 10%
-        const devLamports = totalLamports - jackpotLamports;      // 90%
+        const jackpotLamports = Math.floor(totalLamports * 0.10);
+        const devLamports = totalLamports - jackpotLamports;
 
         const transaction = new solanaWeb3.Transaction();
 
-        // 90% to Dev
         transaction.add(
           solanaWeb3.SystemProgram.transfer({
             fromPubkey: fromPubkey,
@@ -952,7 +962,6 @@
           })
         );
 
-        // 10% to Jackpot
         transaction.add(
           solanaWeb3.SystemProgram.transfer({
             fromPubkey: fromPubkey,
@@ -971,13 +980,11 @@
         log(`TX SENT: ${signature.slice(0, 12)}... Confirming...`);
         await connection.confirmTransaction(signature, "confirmed");
 
-        // Success
         testRunsAccumulator += selectedWager;
         renderJackpot();
         playerCredits += 1;
         log(`PAYMENT SUCCESS (90% Dev + 10% Jackpot) • STARTING RUN`);
 
-        // Start game
         gameState = 'COUNTDOWN';
         countdownStart = performance.now();
         lastTickSec = 4;
@@ -985,7 +992,6 @@
         attractScreen.style.display = 'none';
         deathSplash.style.display = 'none';
 
-        // Pointer Lock (desktop)
         canvas.requestPointerLock = canvas.requestPointerLock || canvas.mozRequestPointerLock;
         if (canvas.requestPointerLock) canvas.requestPointerLock();
 
@@ -1003,7 +1009,6 @@
 
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-      // Cyber Grid
       ctx.strokeStyle = '#140d28'; ctx.lineWidth = 1;
       for (let x = 0; x < canvas.width; x += 20) {
         ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, canvas.height); ctx.stroke();
@@ -1012,7 +1017,6 @@
         ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(canvas.width, y); ctx.stroke();
       }
 
-      // COUNTDOWN
       if (gameState === 'COUNTDOWN') {
         const elapsedPrep = (timestamp - countdownStart) / 1000;
         countdownRemaining = Math.max(0, 3 - elapsedPrep);
@@ -1070,7 +1074,6 @@
         return;
       }
 
-      // ACTIVE RUN
       if (gameState === 'ACTIVE') {
         const elapsed = (timestamp - runStartTime) / 1000;
         timerDisplay.innerText = elapsed.toFixed(3) + 's';
@@ -1140,4 +1143,4 @@
     renderJackpot();
   </script>
 </body>
-          </html>
+</html>
