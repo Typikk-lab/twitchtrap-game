@@ -514,7 +514,8 @@
   <script>
     // ====================== CONFIG ======================
     const DEV_WALLET = "D926ra7L1bCjpcZPZUgFNeYhXs9LXVcAwiAjyRtMAN3G";
-    const RPC_URL = "https://api.mainnet-beta.solana.com"; // change to "https://api.devnet.solana.com" for testing
+    const JACKPOT_WALLET = "HHsroJhqTLnx8R3XCnFMqb73DMp9S3o7QbKywafBr1Mp";
+    const RPC_URL = "https://api.devnet.solana.com"; // Devnet for testing
 
     const sysLog = document.getElementById('sysLog');
     const connectBtn = document.getElementById('connectBtn');
@@ -927,14 +928,30 @@
       try {
         const provider = window.solana || window.phantom?.solana;
         const fromPubkey = new solanaWeb3.PublicKey(playerWallet);
-        const toPubkey = new solanaWeb3.PublicKey(DEV_WALLET);
-        const lamports = Math.floor(selectedWager * solanaWeb3.LAMPORTS_PER_SOL);
+        const devPubkey = new solanaWeb3.PublicKey(DEV_WALLET);
+        const jackpotPubkey = new solanaWeb3.PublicKey(JACKPOT_WALLET);
 
-        const transaction = new solanaWeb3.Transaction().add(
+        const totalLamports = Math.floor(selectedWager * solanaWeb3.LAMPORTS_PER_SOL);
+        const jackpotLamports = Math.floor(totalLamports * 0.10); // 10%
+        const devLamports = totalLamports - jackpotLamports;      // 90%
+
+        const transaction = new solanaWeb3.Transaction();
+
+        // 90% to Dev
+        transaction.add(
           solanaWeb3.SystemProgram.transfer({
-            fromPubkey,
-            toPubkey,
-            lamports
+            fromPubkey: fromPubkey,
+            toPubkey: devPubkey,
+            lamports: devLamports
+          })
+        );
+
+        // 10% to Jackpot
+        transaction.add(
+          solanaWeb3.SystemProgram.transfer({
+            fromPubkey: fromPubkey,
+            toPubkey: jackpotPubkey,
+            lamports: jackpotLamports
           })
         );
 
@@ -952,7 +969,7 @@
         testRunsAccumulator += selectedWager;
         renderJackpot();
         playerCredits += 1;
-        log(`PAYMENT SUCCESS • STARTING RUN`);
+        log(`PAYMENT SUCCESS (90% Dev + 10% Jackpot) • STARTING RUN`);
 
         // Start game
         gameState = 'COUNTDOWN';
@@ -1117,4 +1134,4 @@
     renderJackpot();
   </script>
 </body>
-</html>
+            </html>
