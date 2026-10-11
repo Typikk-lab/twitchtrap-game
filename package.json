@@ -8,10 +8,13 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@solana/web3.js": "^1.95.8",
-    "@supabase/supabase-js": "^2.48.1"
+    "@solana/web3.js": "^1.99.0",
+    "@supabase/supabase-js": "^2.117.3",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0"
   },
   "devDependencies": {
-    "vite": "^6.0.0"
+    "@vitejs/plugin-react": "^6.1.2",
+    "vite": "^8.3.4"
   }
 }

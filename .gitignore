@@ -1,10 +1,8 @@
-.anchor/
+﻿.anchor/
 node_modules/
 target/
+dist/
 .env
-**/*.json
-!package.json
-!package-lock.json
-!tsconfig.json
-!Anchor.toml
+.env.*
+!.env.example
 *.exe

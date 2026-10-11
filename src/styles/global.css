@@ -1,0 +1,237 @@
+﻿:root {
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  color: #f4f0ff;
+  background: #09090f;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-optical-sizing: auto;
+  font-weight: 400;
+  --bg: #09090f;
+  --panel: #11111b;
+  --lime: #d6ff3f;
+  --purple: #9b72ff;
+  --muted: #a5a2b5;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  min-width: 320px;
+  min-height: 100%;
+  background: var(--bg);
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 5;
+  pointer-events: none;
+  opacity: 0.12;
+  background: repeating-linear-gradient(
+    to bottom,
+    transparent 0,
+    transparent 3px,
+    rgba(255, 255, 255, 0.07) 4px
+  );
+}
+
+button,
+a {
+  font: inherit;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.app-shell {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  overflow: hidden;
+  isolation: isolate;
+  background:
+    radial-gradient(ellipse at 50% 42%, rgba(111, 57, 205, 0.2), transparent 48%),
+    radial-gradient(ellipse at 10% 100%, rgba(214, 255, 63, 0.055), transparent 35%),
+    var(--bg);
+}
+
+.app-shell::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  opacity: 0.16;
+  background-image:
+    linear-gradient(rgba(155, 114, 255, 0.13) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(155, 114, 255, 0.13) 1px, transparent 1px);
+  background-size: 48px 48px;
+  mask-image: linear-gradient(to bottom, transparent, black 25%, black 80%, transparent);
+}
+
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: min(1160px, calc(100% - 48px));
+  margin: 0 auto;
+  padding: 30px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.09);
+}
+
+.brand {
+  font-size: 1.15rem;
+  font-weight: 950;
+  letter-spacing: -0.07em;
+}
+
+.brand span {
+  color: var(--lime);
+}
+
+.network-status {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  color: var(--muted);
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+}
+
+.status-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--lime);
+  box-shadow: 0 0 12px rgba(214, 255, 63, 0.8);
+}
+
+.hero {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: min(1000px, calc(100% - 36px));
+  margin: 0 auto;
+  padding: 100px 0 120px;
+  text-align: center;
+}
+
+.eyebrow {
+  margin: 0 0 25px;
+  color: var(--lime);
+  font-size: 0.75rem;
+  font-weight: 900;
+  letter-spacing: 0.28em;
+}
+
+.hero h1 {
+  margin: 0;
+  font-size: clamp(2.8rem, 8.5vw, 7rem);
+  font-weight: 1000;
+  line-height: 0.98;
+  letter-spacing: -0.085em;
+}
+
+.hero h1 span {
+  color: var(--lime);
+  text-shadow: 0 0 40px rgba(214, 255, 63, 0.13);
+}
+
+.hero-copy {
+  max-width: 460px;
+  margin: 27px 0 34px;
+  color: var(--muted);
+  font-size: clamp(0.95rem, 2vw, 1.1rem);
+  line-height: 1.7;
+}
+
+.play-button {
+  min-height: 54px;
+  padding: 0 25px;
+  border: 1px solid rgba(214, 255, 63, 0.25);
+  border-radius: 4px;
+  background: rgba(214, 255, 63, 0.07);
+  color: var(--lime);
+  font-size: 0.73rem;
+  font-weight: 900;
+  letter-spacing: 0.1em;
+}
+
+.play-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.78;
+}
+
+.footer {
+  padding: 24px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  color: #777487;
+  font-size: 0.65rem;
+  font-weight: 800;
+  letter-spacing: 0.13em;
+  text-align: center;
+}
+
+.footer span {
+  padding: 0 7px;
+  color: var(--lime);
+}
+
+@media (max-width: 520px) {
+  .topbar {
+    width: calc(100% - 32px);
+    padding: 23px 0;
+  }
+
+  .brand {
+    font-size: 1rem;
+  }
+
+  .network-status {
+    gap: 6px;
+    font-size: 0.57rem;
+    letter-spacing: 0.07em;
+  }
+
+  .hero {
+    padding: 80px 0 90px;
+  }
+
+  .hero h1 {
+    letter-spacing: -0.075em;
+  }
+
+  .play-button {
+    max-width: 100%;
+    padding: 0 15px;
+    font-size: 0.64rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
