@@ -1,20 +1,14 @@
 import { useEffect, useRef, useState } from 'react'
 import './ArcadeGame.css'
 import { createAudioEngine } from './audio.js'
+import {
+  GAME_HEIGHT as HEIGHT,
+  GAME_WIDTH as WIDTH,
+  getTargetAtElapsed,
+  isCursorInsideTarget,
+} from './arcadeRules.js'
 
-const WIDTH = 800
-const HEIGHT = 420
 const COUNTDOWN_SECONDS = 3
-const MAX_RAMP_SECONDS = 30
-
-function insideBox(cursor, box) {
-  return (
-    cursor.x >= box.x &&
-    cursor.x <= box.x + box.size &&
-    cursor.y >= box.y &&
-    cursor.y <= box.y + box.size
-  )
-}
 
 const DEGEN_TAUNTS = [
   { title: 'BRO GOT LIQUIDATED', subtitle: 'The target was literally right there.' },
@@ -49,6 +43,7 @@ export default function ArcadeGame() {
   const [elapsed, setElapsed] = useState(0)
   const [multiplier, setMultiplier] = useState(1)
   const [result, setResult] = useState(null)
+  const [verificationStatus, setVerificationStatus] = useState('local')
   const [bestTime, setBestTime] = useState(() => {
     try {
       return Number(window.localStorage.getItem('twitchtrap-best-time')) || 0
@@ -195,6 +190,14 @@ export default function ArcadeGame() {
       }
     }
 
+    function beginActiveRun(timestamp) {
+      audioRef.current?.lockIn()
+      modeRef.current = 'ACTIVE'
+      startRef.current = timestamp
+      lastHudSecondRef.current = -1
+      setMode('ACTIVE')
+    }
+
     function frame(timestamp) {
       drawGrid()
 
@@ -209,6 +212,15 @@ export default function ArcadeGame() {
         drawLabel('KEEP YOUR CURSOR INSIDE THE BOX', HEIGHT - 25, '#a5a2b5', 11)
       }
 
+      if (currentMode === 'PREPARING') {
+        box = { x: WIDTH / 2 - 55, y: HEIGHT / 2 - 55, size: 110 }
+        boxRef.current = box
+        drawTarget(box, '#9b72ff')
+        drawLabel('PREPARING RUN...', 42, '#d6ff3f')
+        drawLabel('REQUESTING RUN CHALLENGE', HEIGHT - 25, '#a5a2b5', 11)
+        drawCursor()
+      }
+
       if (currentMode === 'COUNTDOWN') {
         const elapsedCountdown = (timestamp - startRef.current) / 1000
         const remaining = Math.max(0, COUNTDOWN_SECONDS - elapsedCountdown)
@@ -216,7 +228,7 @@ export default function ArcadeGame() {
         box = { x: WIDTH / 2 - 55, y: HEIGHT / 2 - 55, size: 110 }
         boxRef.current = box
 
-        const locked = insideBox(cursorRef.current, box)
+        const locked = isCursorInsideTarget(cursorRef.current, box)
         drawTarget(box, locked ? '#00ff66' : '#ffcc00', 3)
         drawLabel(`GET READY: ${remaining.toFixed(1)}s`, 42)
         drawLabel(
@@ -235,41 +247,22 @@ export default function ArcadeGame() {
               0,
             )
           } else {
-            audioRef.current?.lockIn()
-            modeRef.current = 'ACTIVE'
-            startRef.current = timestamp
-            lastHudSecondRef.current = -1
-            setMode('ACTIVE')
+            beginActiveRun(timestamp)
           }
         }
       }
 
       if (currentMode === 'ACTIVE' || modeRef.current === 'ACTIVE') {
         const activeElapsed = Math.max(0, (timestamp - startRef.current) / 1000)
-        const ramp = Math.min(activeElapsed / MAX_RAMP_SECONDS, 1)
-        const size = Math.max(45, 110 - ramp * 65)
-        const speed = 0.6 + ramp * 2.1
-        const ampX = 70 + ramp * 80
-        const ampY = 40 + ramp * 50
-        const centerX = WIDTH / 2 - size / 2
-        const centerY = HEIGHT / 2 - size / 2
-
-        box = {
-          x: centerX + Math.sin(activeElapsed * speed) * ampX,
-          y: centerY + Math.cos(activeElapsed * speed * 1.3) * ampY,
-          size,
-        }
+        box = getTargetAtElapsed(activeElapsed)
+        const size = box.size
         boxRef.current = box
 
         drawTarget(box, '#00eaff')
         drawCursor()
 
         const cursor = cursorRef.current
-        const outOfBounds =
-          cursor.x < box.x ||
-          cursor.x > box.x + box.size ||
-          cursor.y < box.y ||
-          cursor.y > box.y + box.size
+        const outOfBounds = !isCursorInsideTarget(cursor, box)
 
         drawLabel(`SURVIVED ${activeElapsed.toFixed(2)}s`, 34, '#ffffff', 12)
         drawLabel(
@@ -344,22 +337,25 @@ export default function ArcadeGame() {
     }
   }
 
-  function startGame() {
-    if (modeRef.current === 'COUNTDOWN' || modeRef.current === 'ACTIVE') return
+  async function startGame() {
+    if (['PREPARING', 'COUNTDOWN', 'ACTIVE'].includes(modeRef.current)) return
+
     audioRef.current?.unlock()
+    setElapsed(0)
+    setMultiplier(1)
+    setResult(null)
+    setVerificationStatus('local')
 
     cursorRef.current = { x: -100, y: -100 }
     boxRef.current = { x: WIDTH / 2 - 55, y: HEIGHT / 2 - 55, size: 110 }
     startRef.current = performance.now()
     lastHudSecondRef.current = -1
-    setElapsed(0)
-    setMultiplier(1)
-    setResult(null)
     modeRef.current = 'COUNTDOWN'
     setMode('COUNTDOWN')
   }
 
-  const running = mode === 'COUNTDOWN' || mode === 'ACTIVE'
+  const running =
+    mode === 'PREPARING' || mode === 'COUNTDOWN' || mode === 'ACTIVE'
 
   return (
     <section className="arcade-game" aria-label="TwitchTrap arcade game">
@@ -417,13 +413,15 @@ export default function ArcadeGame() {
           onClick={startGame}
           disabled={running}
         >
-          {mode === 'COUNTDOWN'
-            ? 'GET READY...'
-            : mode === 'ACTIVE'
-              ? 'RUN IN PROGRESS'
-              : mode === 'DEAD'
-                ? 'PLAY AGAIN'
-                : 'START FREE RUN'}
+          {mode === 'PREPARING'
+            ? 'PREPARING RUN...'
+            : mode === 'COUNTDOWN'
+              ? 'GET READY...'
+              : mode === 'ACTIVE'
+                ? 'RUN IN PROGRESS'
+                : mode === 'DEAD'
+                  ? 'PLAY AGAIN'
+                  : 'START FREE RUN'}
         </button>
       </div>
 
@@ -442,8 +440,8 @@ export default function ArcadeGame() {
         </span>
       </div>
 
-      <p className="arcade-safety-note">
-        LOCAL GAME DEMO | NO WALLET REQUIRED | NO PAYMENTS OR PRIZES
+            <p className="arcade-safety-note">
+        LOCAL GAME DEMO | NO WALLET REQUIRED | NO PAYMENTS OR PRIZES | UNVERIFIED LOCAL RUN
       </p>
     </section>
   )

@@ -1,0 +1,984 @@
+﻿TWITCHTRAP DESIGN INSPECTION
+
+
+========== .\src\App.jsx ==========
+import { useState } from 'react'
+import { useWallet } from './lib/useWallet.js'
+import ArcadeGame from './game/ArcadeGame.jsx'
+
+export default function App() {
+  const [walletMenuOpen, setWalletMenuOpen] = useState(false)
+
+  const {
+    providers,
+    walletName,
+    address,
+    shortAddress,
+    busy,
+    error,
+    connect,
+    disconnect,
+  } = useWallet()
+
+  async function selectWallet(walletId) {
+    setWalletMenuOpen(false)
+    await connect(walletId)
+  }
+
+  async function handleDisconnect() {
+    await disconnect()
+  }
+
+  return (
+    <main className="app-shell">
+      <header className="topbar">
+        <a className="brand" href="/" aria-label="TwitchTrap home">
+          TWITCH<span>TRAP</span>
+        </a>
+
+        <div className="header-actions">
+          <div className="network-status">
+            <span className="status-dot" />
+            LOCAL GAME · PREVIEW
+          </div>
+
+          {address ? (
+            <button
+              className="wallet-button wallet-connected"
+              onClick={handleDisconnect}
+              disabled={busy}
+              title={`${walletName}: ${address}. Click to disconnect.`}
+            >
+              <span className="wallet-indicator" />
+              {busy ? 'DISCONNECTING...' : shortAddress}
+            </button>
+          ) : (
+            <div className="wallet-menu">
+              <button
+                className="wallet-button"
+                disabled={busy || providers.length === 0}
+                onClick={() => setWalletMenuOpen((open) => !open)}
+                aria-expanded={walletMenuOpen}
+                aria-haspopup="true"
+                title={
+                  providers.length === 0
+                    ? 'Install Phantom or Solflare to connect'
+                    : 'Choose a browser wallet'
+                }
+              >
+                {busy ? 'CONNECTING...' : 'CONNECT WALLET'}
+              </button>
+
+              {walletMenuOpen && providers.length > 0 && (
+                <div className="wallet-options" role="menu">
+                  {providers.map((item) => (
+                    <button
+                      key={item.id}
+                      className="wallet-option"
+                      role="menuitem"
+                      onClick={() => selectWallet(item.id)}
+                      disabled={busy}
+                    >
+                      {item.name}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      </header>
+
+      <section className="hero">
+        <p className="eyebrow">INSERT DEGEN ENERGY</p>
+
+        <h1>
+          PLAY THE GAME.
+          <br />
+          <span>BEAT THE TRAP.</span>
+        </h1>
+
+        <p className="hero-copy">
+          Keep your cursor inside the target. Survive as the trap gets smaller,
+          faster, and harder to control.
+        </p>
+
+        <ArcadeGame />
+
+        <p className="preview-note">
+          FREE LOCAL DEMO · WALLET NOT REQUIRED · NO TRANSACTIONS ENABLED
+        </p>
+
+        {error && (
+          <p className="wallet-error" role="alert">
+            {error}
+          </p>
+        )}
+
+        {!address && providers.length === 0 && (
+          <p className="wallet-help">
+            Wallet connection is optional and is not used by the game.
+          </p>
+        )}
+
+        {address && (
+          <div className="wallet-card">
+            <span className="wallet-card-label">WALLET CONNECTED</span>
+            <strong>{walletName}</strong>
+            <code>{address}</code>
+            <span className="wallet-card-note">
+              Wallet preview only. Gameplay does not send transactions or use
+              wallet funds.
+            </span>
+          </div>
+        )}
+      </section>
+
+      <footer className="footer">
+        TWITCHTRAP ARCADE <span>·</span> LOCAL GAME PREVIEW
+      </footer>
+    </main>
+  )
+}
+
+
+========== .\src\styles\global.css ==========
+:root {
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  color: #f4f0ff;
+  background: #09090f;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-optical-sizing: auto;
+  font-weight: 400;
+  --bg: #09090f;
+  --panel: #11111b;
+  --lime: #d6ff3f;
+  --purple: #9b72ff;
+  --muted: #a5a2b5;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  min-width: 320px;
+  min-height: 100%;
+  background: var(--bg);
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 5;
+  pointer-events: none;
+  opacity: 0.12;
+  background: repeating-linear-gradient(
+    to bottom,
+    transparent 0,
+    transparent 3px,
+    rgba(255, 255, 255, 0.07) 4px
+  );
+}
+
+button,
+a {
+  font: inherit;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.app-shell {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  overflow: hidden;
+  isolation: isolate;
+  background:
+    radial-gradient(ellipse at 50% 42%, rgba(111, 57, 205, 0.2), transparent 48%),
+    radial-gradient(ellipse at 10% 100%, rgba(214, 255, 63, 0.055), transparent 35%),
+    var(--bg);
+}
+
+.app-shell::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  opacity: 0.16;
+  background-image:
+    linear-gradient(rgba(155, 114, 255, 0.13) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(155, 114, 255, 0.13) 1px, transparent 1px);
+  background-size: 48px 48px;
+  mask-image: linear-gradient(to bottom, transparent, black 25%, black 80%, transparent);
+}
+
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: min(1160px, calc(100% - 48px));
+  margin: 0 auto;
+  padding: 30px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.09);
+}
+
+.brand {
+  font-size: 1.15rem;
+  font-weight: 950;
+  letter-spacing: -0.07em;
+}
+
+.brand span {
+  color: var(--lime);
+}
+
+.network-status {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  color: var(--muted);
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+}
+
+.status-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--lime);
+  box-shadow: 0 0 12px rgba(214, 255, 63, 0.8);
+}
+
+.hero {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: min(1000px, calc(100% - 36px));
+  margin: 0 auto;
+  padding: 100px 0 120px;
+  text-align: center;
+}
+
+.eyebrow {
+  margin: 0 0 25px;
+  color: var(--lime);
+  font-size: 0.75rem;
+  font-weight: 900;
+  letter-spacing: 0.28em;
+}
+
+.hero h1 {
+  margin: 0;
+  font-size: clamp(2.8rem, 8.5vw, 7rem);
+  font-weight: 1000;
+  line-height: 0.98;
+  letter-spacing: -0.085em;
+}
+
+.hero h1 span {
+  color: var(--lime);
+  text-shadow: 0 0 40px rgba(214, 255, 63, 0.13);
+}
+
+.hero-copy {
+  max-width: 460px;
+  margin: 27px 0 34px;
+  color: var(--muted);
+  font-size: clamp(0.95rem, 2vw, 1.1rem);
+  line-height: 1.7;
+}
+
+.play-button {
+  min-height: 54px;
+  padding: 0 25px;
+  border: 1px solid rgba(214, 255, 63, 0.25);
+  border-radius: 4px;
+  background: rgba(214, 255, 63, 0.07);
+  color: var(--lime);
+  font-size: 0.73rem;
+  font-weight: 900;
+  letter-spacing: 0.1em;
+}
+
+.play-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.78;
+}
+
+.footer {
+  padding: 24px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  color: #777487;
+  font-size: 0.65rem;
+  font-weight: 800;
+  letter-spacing: 0.13em;
+  text-align: center;
+}
+
+.footer span {
+  padding: 0 7px;
+  color: var(--lime);
+}
+
+@media (max-width: 520px) {
+  .topbar {
+    width: calc(100% - 32px);
+    padding: 23px 0;
+  }
+
+  .brand {
+    font-size: 1rem;
+  }
+
+  .network-status {
+    gap: 6px;
+    font-size: 0.57rem;
+    letter-spacing: 0.07em;
+  }
+
+  .hero {
+    padding: 80px 0 90px;
+  }
+
+  .hero h1 {
+    letter-spacing: -0.075em;
+  }
+
+  .play-button {
+    max-width: 100%;
+    padding: 0 15px;
+    font-size: 0.64rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+
+.wallet-menu {
+  position: relative;
+}
+
+.wallet-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 38px;
+  padding: 0 13px;
+  border: 1px solid rgba(214, 255, 63, 0.45);
+  border-radius: 4px;
+  background: rgba(214, 255, 63, 0.08);
+  color: var(--lime);
+  cursor: pointer;
+  font-size: 0.65rem;
+  font-weight: 900;
+  letter-spacing: 0.06em;
+}
+
+.wallet-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.wallet-connected {
+  border-color: rgba(155, 114, 255, 0.55);
+  color: #d6c6ff;
+}
+
+.wallet-indicator {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--lime);
+  box-shadow: 0 0 9px rgba(214, 255, 63, 0.65);
+}
+
+.wallet-options {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  z-index: 10;
+  display: grid;
+  min-width: 140px;
+  padding: 5px;
+  border: 1px solid rgba(155, 114, 255, 0.35);
+  border-radius: 4px;
+  background: #151321;
+}
+
+.wallet-option {
+  padding: 10px;
+  border: 0;
+  background: transparent;
+  color: #f4f0ff;
+  cursor: pointer;
+  text-align: left;
+}
+
+.wallet-option:hover {
+  background: rgba(155, 114, 255, 0.15);
+}
+
+.preview-note {
+  margin: 25px 0 0;
+  color: #777487;
+  font-size: 0.61rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+}
+
+.wallet-help,
+.wallet-error {
+  max-width: 460px;
+  margin: 15px 0 0;
+  font-size: 0.8rem;
+  line-height: 1.6;
+}
+
+.wallet-help {
+  color: var(--muted);
+}
+
+.wallet-error {
+  color: #ff9eab;
+  overflow-wrap: anywhere;
+}
+
+.wallet-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  width: min(100%, 460px);
+  margin-top: 25px;
+  padding: 22px;
+  border: 1px solid rgba(155, 114, 255, 0.3);
+  border-radius: 5px;
+  background: rgba(17, 17, 27, 0.85);
+}
+
+.wallet-card-label,
+.wallet-card-note {
+  color: var(--muted);
+  font-size: 0.65rem;
+  letter-spacing: 0.08em;
+  text-align: center;
+}
+
+.wallet-card strong {
+  color: var(--lime);
+}
+
+.wallet-card code {
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  color: #d6c6ff;
+  font-size: 0.8rem;
+}
+
+.wallet-card-note {
+  letter-spacing: 0;
+  line-height: 1.6;
+}
+
+@media (max-width: 650px) {
+  .topbar {
+    align-items: flex-start;
+    gap: 16px;
+  }
+
+  .header-actions {
+    align-items: flex-end;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .wallet-button {
+    min-height: 35px;
+    font-size: 0.58rem;
+  }
+}
+
+
+========== .\src\game\ArcadeGame.jsx ==========
+import { useEffect, useRef, useState } from 'react'
+import './ArcadeGame.css'
+import { createAudioEngine } from './audio.js'
+
+const WIDTH = 800
+const HEIGHT = 420
+const COUNTDOWN_SECONDS = 3
+const MAX_RAMP_SECONDS = 30
+
+function insideBox(cursor, box) {
+  return (
+    cursor.x >= box.x &&
+    cursor.x <= box.x + box.size &&
+    cursor.y >= box.y &&
+    cursor.y <= box.y + box.size
+  )
+}
+
+const DEGEN_TAUNTS = [
+  { title: 'BRO GOT LIQUIDATED Ã°Å¸â€™â‚¬', subtitle: 'The target was literally right there.' },
+  { title: 'SKILL ISSUE DETECTED', subtitle: 'Your hands have paper hands.' },
+  { title: 'ABSOLUTE CINEMA Ã°Å¸ÂÂ¿', subtitle: 'Thirty seconds of confidence. One frame of consequences.' },
+  { title: 'NGMI.', subtitle: 'The trap remains undefeated. Your comeback is pending.' },
+  { title: 'EXIT LIQUIDITY FOUND', subtitle: 'You were the liquidity.' },
+  { title: 'WITNESSED. RECORDED. MOCKED.', subtitle: 'The replay is going straight to the group chat.' },
+  { title: 'TOUCH GRASS? YOU TOUCHED DEATH.', subtitle: 'The box said stay inside. You chose freedom.' },
+  { title: 'BRO FUMBLED THE BAG', subtitle: 'A generational fumble in real time.' },
+  { title: 'NPC MOVEMENT DETECTED', subtitle: 'Even the tutorial is disappointed.' },
+  { title: 'PACK IT UP Ã°Å¸ÂªÂ¦', subtitle: 'The run is over. The screenshots are forever.' },
+]
+
+export default function ArcadeGame() {
+  const canvasRef = useRef(null)
+  const audioRef = useRef(null)
+  const [isMuted, setIsMuted] = useState(() => {
+    try {
+      return window.localStorage.getItem('twitchtrap-muted') === 'true'
+    } catch {
+      return false
+    }
+  })
+  const modeRef = useRef('IDLE')
+  const cursorRef = useRef({ x: -100, y: -100 })
+  const startRef = useRef(0)
+  const lastHudSecondRef = useRef(-1)
+  const boxRef = useRef({ x: 345, y: 155, size: 110 })
+
+  const [mode, setMode] = useState('IDLE')
+  const [elapsed, setElapsed] = useState(0)
+  const [multiplier, setMultiplier] = useState(1)
+  const [result, setResult] = useState(null)
+  const [bestTime, setBestTime] = useState(() => {
+    try {
+      return Number(window.localStorage.getItem('twitchtrap-best-time')) || 0
+    } catch {
+      return 0
+    }
+  })
+
+  useEffect(() => {
+    audioRef.current = createAudioEngine()
+    audioRef.current.setMuted(isMuted)
+
+    return () => {
+      audioRef.current?.dispose()
+      audioRef.current = null
+    }
+  }, [])
+
+  useEffect(() => {
+    audioRef.current?.setMuted(isMuted)
+  }, [isMuted])
+
+  useEffect(() => {
+    if (mode === 'DEAD') {
+      audioRef.current?.setScene('death')
+    } else if (mode === 'ACTIVE') {
+      audioRef.current?.setScene('gameplay')
+    } else {
+      audioRef.current?.setScene('menu')
+    }
+  }, [mode])
+
+  useEffect(() => {
+    audioRef.current?.setIntensity(Math.min(elapsed / 30, 1))
+  }, [elapsed])
+  useEffect(() => {
+    const canvas = canvasRef.current
+    const ctx = canvas?.getContext('2d')
+    if (!canvas || !ctx) return undefined
+
+    let animationId = 0
+
+    function drawGrid() {
+      ctx.fillStyle = '#080812'
+      ctx.fillRect(0, 0, WIDTH, HEIGHT)
+
+      ctx.strokeStyle = 'rgba(130, 95, 210, 0.16)'
+      ctx.lineWidth = 1
+
+      for (let x = 0; x <= WIDTH; x += 24) {
+        ctx.beginPath()
+        ctx.moveTo(x, 0)
+        ctx.lineTo(x, HEIGHT)
+        ctx.stroke()
+      }
+
+      for (let y = 0; y <= HEIGHT; y += 24) {
+        ctx.beginPath()
+        ctx.moveTo(0, y)
+        ctx.lineTo(WIDTH, y)
+        ctx.stroke()
+      }
+
+      const glow = ctx.createRadialGradient(
+        WIDTH / 2, HEIGHT / 2, 20,
+        WIDTH / 2, HEIGHT / 2, 330,
+      )
+      glow.addColorStop(0, 'rgba(95, 40, 170, 0.12)')
+      glow.addColorStop(1, 'rgba(5, 5, 12, 0)')
+      ctx.fillStyle = glow
+      ctx.fillRect(0, 0, WIDTH, HEIGHT)
+    }
+
+    function drawTarget(box, color, lineWidth = 2) {
+      ctx.save()
+      ctx.strokeStyle = color
+      ctx.lineWidth = lineWidth
+      ctx.shadowColor = color
+      ctx.shadowBlur = 14
+      ctx.strokeRect(box.x, box.y, box.size, box.size)
+      ctx.shadowBlur = 0
+
+      const cx = box.x + box.size / 2
+      const cy = box.y + box.size / 2
+
+      ctx.lineWidth = 1
+      ctx.beginPath()
+      ctx.arc(cx, cy, 10, 0, Math.PI * 2)
+      ctx.stroke()
+
+      ctx.beginPath()
+      ctx.moveTo(cx - 17, cy)
+      ctx.lineTo(cx + 17, cy)
+      ctx.moveTo(cx, cy - 17)
+      ctx.lineTo(cx, cy + 17)
+      ctx.stroke()
+      ctx.restore()
+    }
+
+    function drawCursor() {
+      const cursor = cursorRef.current
+      if (cursor.x < 0 || cursor.y < 0) return
+
+      ctx.save()
+      ctx.fillStyle = '#ff3caa'
+      ctx.shadowColor = '#ff3caa'
+      ctx.shadowBlur = 12
+      ctx.beginPath()
+      ctx.arc(cursor.x, cursor.y, 4, 0, Math.PI * 2)
+      ctx.fill()
+      ctx.restore()
+    }
+
+    function drawLabel(text, y, color = '#f5f0ff', size = 13) {
+      ctx.save()
+      ctx.fillStyle = color
+      ctx.font = `900 ${size}px ui-monospace, monospace`
+      ctx.textAlign = 'center'
+      ctx.fillText(text, WIDTH / 2, y)
+      ctx.restore()
+    }
+
+    function finishRun(title, subtitle, time) {
+      audioRef.current?.death()
+      modeRef.current = 'DEAD'
+      setMode('DEAD')
+      const taunt = DEGEN_TAUNTS[Math.floor(Math.random() * DEGEN_TAUNTS.length)]
+      setResult({ title: taunt.title, subtitle: taunt.subtitle, time })
+
+      if (time > 0) {
+        setBestTime((previousBest) => {
+          if (time <= previousBest) return previousBest
+
+          try {
+            window.localStorage.setItem('twitchtrap-best-time', String(time))
+          } catch {
+            // The game remains playable if browser storage is unavailable.
+          }
+
+          return time
+        })
+      }
+    }
+
+    function frame(timestamp) {
+      drawGrid()
+
+      const currentMode = modeRef.current
+      let box = boxRef.current
+
+      if (currentMode === 'IDLE') {
+        box = { x: WIDTH / 2 - 55, y: HEIGHT / 2 - 55, size: 110 }
+        boxRef.current = box
+        drawTarget(box, '#9b72ff')
+        drawLabel('READY WHEN YOU ARE', 42, '#d6ff3f')
+        drawLabel('KEEP YOUR CURSOR INSIDE THE BOX', HEIGHT - 25, '#a5a2b5', 11)
+      }
+
+      if (currentMode === 'COUNTDOWN') {
+        const elapsedCountdown = (timestamp - startRef.current) / 1000
+        const remaining = Math.max(0, COUNTDOWN_SECONDS - elapsedCountdown)
+
+        box = { x: WIDTH / 2 - 55, y: HEIGHT / 2 - 55, size: 110 }
+        boxRef.current = box
+
+        const locked = insideBox(cursorRef.current, box)
+        drawTarget(box, locked ? '#00ff66' : '#ffcc00', 3)
+        drawLabel(`GET READY: ${remaining.toFixed(1)}s`, 42)
+        drawLabel(
+          locked ? 'TARGET LOCKED' : 'MOVE YOUR CURSOR INTO THE BOX',
+          HEIGHT - 25,
+          locked ? '#00ff66' : '#ffcc00',
+          11,
+        )
+        drawCursor()
+
+        if (remaining <= 0) {
+          if (!locked) {
+            finishRun(
+              'ELIMINATED',
+              'You left the target before the run began.',
+              0,
+            )
+          } else {
+            audioRef.current?.lockIn()
+            modeRef.current = 'ACTIVE'
+            startRef.current = timestamp
+            lastHudSecondRef.current = -1
+            setMode('ACTIVE')
+          }
+        }
+      }
+
+      if (currentMode === 'ACTIVE' || modeRef.current === 'ACTIVE') {
+        const activeElapsed = Math.max(0, (timestamp - startRef.current) / 1000)
+        const ramp = Math.min(activeElapsed / MAX_RAMP_SECONDS, 1)
+        const size = Math.max(45, 110 - ramp * 65)
+        const speed = 0.6 + ramp * 2.1
+        const ampX = 70 + ramp * 80
+        const ampY = 40 + ramp * 50
+        const centerX = WIDTH / 2 - size / 2
+        const centerY = HEIGHT / 2 - size / 2
+
+        box = {
+          x: centerX + Math.sin(activeElapsed * speed) * ampX,
+          y: centerY + Math.cos(activeElapsed * speed * 1.3) * ampY,
+          size,
+        }
+        boxRef.current = box
+
+        drawTarget(box, '#00eaff')
+        drawCursor()
+
+        const cursor = cursorRef.current
+        const outOfBounds =
+          cursor.x < box.x ||
+          cursor.x > box.x + box.size ||
+          cursor.y < box.y ||
+          cursor.y > box.y + box.size
+
+        drawLabel(`SURVIVED ${activeElapsed.toFixed(2)}s`, 34, '#ffffff', 12)
+        drawLabel(
+          `TARGET SIZE ${Math.round(size)}px`,
+          HEIGHT - 20,
+          '#00eaff',
+          10,
+        )
+
+        const wholeSecond = Math.floor(activeElapsed)
+        if (wholeSecond !== lastHudSecondRef.current) {
+          lastHudSecondRef.current = wholeSecond
+          setElapsed(activeElapsed)
+          setMultiplier(1 + activeElapsed * 0.1)
+          audioRef.current?.runPulse(wholeSecond)
+        }
+
+        if (outOfBounds) {
+          finishRun('LIQUIDATED!', 'The target escaped you. Try again.', activeElapsed)
+        } else {
+          animationId = requestAnimationFrame(frame)
+          return
+        }
+      }
+
+      if (modeRef.current === 'DEAD') {
+        drawTarget(boxRef.current, '#ff3caa')
+        drawCursor()
+      }
+
+      animationId = requestAnimationFrame(frame)
+    }
+
+    animationId = requestAnimationFrame(frame)
+
+    return () => cancelAnimationFrame(animationId)
+  }, [])
+
+  function toggleMute() {
+    if (!audioRef.current?.isReady()) {
+      if (isMuted) {
+        setIsMuted(false)
+        try {
+          window.localStorage.setItem('twitchtrap-muted', 'false')
+        } catch {
+          // Audio remains available for this session.
+        }
+      }
+      void audioRef.current?.unlock()
+      return
+    }
+
+    setIsMuted((previous) => {
+      const next = !previous
+      try {
+        window.localStorage.setItem('twitchtrap-muted', String(next))
+      } catch {
+        // Mute still works for this session if storage is unavailable.
+      }
+      return next
+    })
+  }
+
+  function updateCursor(event) {
+    const canvas = canvasRef.current
+    if (!canvas) return
+
+    const rect = canvas.getBoundingClientRect()
+    cursorRef.current = {
+      x: ((event.clientX - rect.left) / rect.width) * WIDTH,
+      y: ((event.clientY - rect.top) / rect.height) * HEIGHT,
+    }
+  }
+
+  function startGame() {
+    if (modeRef.current === 'COUNTDOWN' || modeRef.current === 'ACTIVE') return
+    audioRef.current?.unlock()
+
+    cursorRef.current = { x: -100, y: -100 }
+    boxRef.current = { x: WIDTH / 2 - 55, y: HEIGHT / 2 - 55, size: 110 }
+    startRef.current = performance.now()
+    lastHudSecondRef.current = -1
+    setElapsed(0)
+    setMultiplier(1)
+    setResult(null)
+    modeRef.current = 'COUNTDOWN'
+    setMode('COUNTDOWN')
+  }
+
+  const running = mode === 'COUNTDOWN' || mode === 'ACTIVE'
+
+  return (
+    <section className="arcade-game" aria-label="TwitchTrap arcade game">
+      <div className="arcade-hud">
+        <div className="arcade-stat">
+          <span>SURVIVAL</span>
+          <strong>{elapsed.toFixed(2)}s</strong>
+        </div>
+        <div className="arcade-stat arcade-stat-center">
+          <span>DEMO MULTIPLIER</span>
+          <strong key={Math.floor(elapsed)} className="arcade-multiplier">{`x${multiplier.toFixed(2)}`}</strong>
+        </div>
+        <div className="arcade-stat arcade-stat-right">
+          <span>PERSONAL BEST</span>
+          <strong>{bestTime.toFixed(2)}s</strong>
+        </div>
+      </div>
+
+      <div className={`arcade-screen ${mode === 'DEAD' ? 'death-impact' : ''}`}>
+        <canvas
+          ref={canvasRef}
+          width={WIDTH}
+          height={HEIGHT}
+          onPointerMove={updateCursor}
+          aria-label="Move your cursor inside the moving target to survive"
+        />
+        <div
+          className={`death-flash ${mode === 'DEAD' ? 'active' : ''}`}
+          aria-hidden="true"
+        />
+
+        {mode === 'DEAD' && (
+          <div className="arcade-result" role="status">
+            <p className="arcade-result-kicker">RUN ENDED</p>
+            <h2>{result?.title}</h2>
+            <p>{result?.subtitle}</p>
+            <div className="arcade-result-stats">
+              <span>SURVIVAL TIME</span>
+              <strong>{(result?.time ?? 0).toFixed(3)}s</strong>
+            </div>
+            <button className="arcade-start-button" onClick={startGame}>
+              TRY AGAIN
+            </button>
+          </div>
+        )}
+      </div>
+
+      <div className="arcade-controls">
+        <div>
+          <strong>STAY IN THE BOX.</strong>
+          <p>The target moves faster and shrinks as time passes.</p>
+        </div>
+        <button
+          className="arcade-start-button"
+          onClick={startGame}
+          disabled={running}
+        >
+          {mode === 'COUNTDOWN'
+            ? 'GET READY...'
+            : mode === 'ACTIVE'
+              ? 'RUN IN PROGRESS'
+              : mode === 'DEAD'
+                ? 'PLAY AGAIN'
+                : 'START FREE RUN'}
+        </button>
+      </div>
+
+      <div className="arcade-audio-row">
+        <button
+          type="button"
+          className="arcade-mute-button"
+          onClick={toggleMute}
+          aria-pressed={isMuted}
+          aria-label={isMuted ? 'Unmute game sounds' : 'Mute game sounds'}
+        >
+          {isMuted ? 'Ã¢â„¢Âª SOUND OFF' : 'Ã¢â„¢Â« SOUND ON'}
+        </button>
+        <span className="arcade-audio-caption">
+          PROCEDURAL ARCADE AUDIO
+        </span>
+      </div>
+
+      <p className="arcade-safety-note">
+        LOCAL GAME DEMO Ã‚Â· NO WALLET REQUIRED Ã‚Â· NO PAYMENTS OR PRIZES
+      </p>
+    </section>
+  )
+}

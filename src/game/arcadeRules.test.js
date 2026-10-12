@@ -1,0 +1,93 @@
+import { describe, expect, it } from 'vitest'
+import {
+  GAME_HEIGHT,
+  GAME_WIDTH,
+  getTargetAtElapsed,
+  isCursorInsideTarget,
+} from './arcadeRules.js'
+
+describe('getTargetAtElapsed', () => {
+  it('returns the existing centered target at the start', () => {
+    expect(getTargetAtElapsed(0)).toEqual({
+      x: 345,
+      y: 155,
+      size: 110,
+    })
+  })
+
+  it('shrinks the target during the first 30 seconds', () => {
+    expect(getTargetAtElapsed(15).size).toBe(77.5)
+    expect(getTargetAtElapsed(30).size).toBe(45)
+  })
+
+  it('keeps the minimum target size after the ramp finishes', () => {
+    expect(getTargetAtElapsed(60).size).toBe(45)
+  })
+
+  it('treats negative elapsed time as the starting position', () => {
+    expect(getTargetAtElapsed(-1)).toEqual(getTargetAtElapsed(0))
+  })
+
+  it.each([NaN, Infinity, -Infinity])(
+    'rejects invalid elapsed time: %s',
+    (elapsed) => {
+      expect(() => getTargetAtElapsed(elapsed)).toThrow(
+        'Elapsed time must be a finite number',
+      )
+    },
+  )
+
+  it('returns finite target coordinates at representative times', () => {
+    for (const elapsed of [0, 1, 5, 15, 30, 60, 300]) {
+      const target = getTargetAtElapsed(elapsed)
+
+      expect(Number.isFinite(target.x)).toBe(true)
+      expect(Number.isFinite(target.y)).toBe(true)
+      expect(target.size).toBeGreaterThanOrEqual(45)
+      expect(target.size).toBeLessThanOrEqual(110)
+    }
+  })
+
+  it('uses the expected canvas dimensions', () => {
+    expect(GAME_WIDTH).toBe(800)
+    expect(GAME_HEIGHT).toBe(420)
+  })
+})
+
+describe('isCursorInsideTarget', () => {
+  const target = { x: 100, y: 80, size: 50 }
+
+  it('accepts a cursor inside the target', () => {
+    expect(isCursorInsideTarget({ x: 120, y: 100 }, target)).toBe(true)
+  })
+
+  it('accepts points exactly on the target boundary', () => {
+    expect(isCursorInsideTarget({ x: 100, y: 80 }, target)).toBe(true)
+    expect(isCursorInsideTarget({ x: 150, y: 130 }, target)).toBe(true)
+  })
+
+  it('rejects a cursor outside any edge', () => {
+    expect(isCursorInsideTarget({ x: 99.9, y: 100 }, target)).toBe(false)
+    expect(isCursorInsideTarget({ x: 150.1, y: 100 }, target)).toBe(false)
+    expect(isCursorInsideTarget({ x: 120, y: 79.9 }, target)).toBe(false)
+    expect(isCursorInsideTarget({ x: 120, y: 130.1 }, target)).toBe(false)
+  })
+
+  it('rejects missing or non-finite cursor coordinates', () => {
+    expect(isCursorInsideTarget(null, target)).toBe(false)
+    expect(isCursorInsideTarget({ x: NaN, y: 100 }, target)).toBe(false)
+    expect(isCursorInsideTarget({ x: 100, y: Infinity }, target)).toBe(false)
+  })
+
+  it('rejects invalid targets', () => {
+    expect(isCursorInsideTarget({ x: 120, y: 100 }, null)).toBe(false)
+    expect(
+      isCursorInsideTarget({ x: 120, y: 100 }, {
+        x: 100,
+        y: 80,
+        size: -1,
+      }),
+    ).toBe(false)
+  })
+})
+

@@ -1,0 +1,64 @@
+﻿-- CE3-style trust boundary for TwitchTrap free-play score verification.
+-- Local migration draft only. Do not apply until reviewed.
+
+create schema if not exists private;
+
+revoke all on schema private from public, anon, authenticated;
+grant usage on schema private to service_role;
+
+create table private.arcade_run_challenges (
+    challenge_id uuid primary key default gen_random_uuid(),
+    seed bigint not null,
+    status text not null default 'issued'
+        check (status in ('issued', 'active', 'verified', 'rejected', 'expired')),
+    issued_at timestamptz not null default clock_timestamp(),
+    activated_at timestamptz,
+    finished_at timestamptz,
+    expires_at timestamptz not null,
+    verified_survival_seconds numeric,
+    rejection_reason text,
+    constraint arcade_run_challenge_expiry_check
+        check (expires_at > issued_at),
+    constraint arcade_run_challenge_timing_check
+        check (
+            activated_at is null
+            or activated_at >= issued_at
+        )
+);
+
+create index arcade_run_challenges_expiry_idx
+    on private.arcade_run_challenges (expires_at);
+
+revoke all on private.arcade_run_challenges
+    from public, anon, authenticated;
+
+grant select, insert, update
+    on private.arcade_run_challenges to service_role;
+
+-- The browser may read the public leaderboard but must not write scores.
+revoke insert, update, delete
+    on public.arcade_scores from public, anon, authenticated;
+
+revoke all on sequence public.arcade_scores_id_seq
+    from public, anon, authenticated;
+
+grant usage on sequence public.arcade_scores_id_seq
+    to service_role;
+
+-- Each verified score must be associated with a unique server-issued run.
+alter table public.arcade_scores
+    add column verification_challenge_id uuid not null;
+
+alter table public.arcade_scores
+    add constraint arcade_scores_verification_challenge_id_key
+    unique (verification_challenge_id);
+
+alter table public.arcade_scores
+    add constraint arcade_scores_verification_challenge_id_fkey
+    foreign key (verification_challenge_id)
+    references private.arcade_run_challenges (challenge_id);
+
+-- The Edge Function's service role will write verified leaderboard scores.
+grant insert, select, update
+    on public.arcade_scores to service_role;
+

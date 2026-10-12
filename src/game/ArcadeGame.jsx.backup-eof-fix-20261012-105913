@@ -1,0 +1,449 @@
+import { useEffect, useRef, useState } from 'react'
+import './ArcadeGame.css'
+import { createAudioEngine } from './audio.js'
+import {
+  GAME_HEIGHT as HEIGHT,
+  GAME_WIDTH as WIDTH,
+  getTargetAtElapsed,
+  isCursorInsideTarget,
+} from './arcadeRules.js'
+
+const COUNTDOWN_SECONDS = 3
+
+const DEGEN_TAUNTS = [
+  { title: 'BRO GOT LIQUIDATED', subtitle: 'The target was literally right there.' },
+  { title: 'SKILL ISSUE DETECTED', subtitle: 'Your hands have paper hands.' },
+  { title: 'ABSOLUTE CINEMA', subtitle: 'Thirty seconds of confidence. One frame of consequences.' },
+  { title: 'NGMI.', subtitle: 'The trap remains undefeated. Your comeback is pending.' },
+  { title: 'EXIT LIQUIDITY FOUND', subtitle: 'You were the liquidity.' },
+  { title: 'WITNESSED. RECORDED. MOCKED.', subtitle: 'The replay is going straight to the group chat.' },
+  { title: 'TOUCH GRASS? YOU TOUCHED DEATH.', subtitle: 'The box said stay inside. You chose freedom.' },
+  { title: 'BRO FUMBLED THE BAG', subtitle: 'A generational fumble in real time.' },
+  { title: 'NPC MOVEMENT DETECTED', subtitle: 'Even the tutorial is disappointed.' },
+  { title: 'PACK IT UP', subtitle: 'The run is over. The screenshots are forever.' },
+]
+
+export default function ArcadeGame() {
+  const canvasRef = useRef(null)
+  const audioRef = useRef(null)
+  const [isMuted, setIsMuted] = useState(() => {
+    try {
+      return window.localStorage.getItem('twitchtrap-muted') === 'true'
+    } catch {
+      return false
+    }
+  })
+  const modeRef = useRef('IDLE')
+  const cursorRef = useRef({ x: -100, y: -100 })
+  const startRef = useRef(0)
+  const lastHudSecondRef = useRef(-1)
+  const boxRef = useRef({ x: 345, y: 155, size: 110 })
+
+  const [mode, setMode] = useState('IDLE')
+  const [elapsed, setElapsed] = useState(0)
+  const [multiplier, setMultiplier] = useState(1)
+  const [result, setResult] = useState(null)
+  const [verificationStatus, setVerificationStatus] = useState('local')
+  const [bestTime, setBestTime] = useState(() => {
+    try {
+      return Number(window.localStorage.getItem('twitchtrap-best-time')) || 0
+    } catch {
+      return 0
+    }
+  })
+
+  useEffect(() => {
+    audioRef.current = createAudioEngine()
+    audioRef.current.setMuted(isMuted)
+
+    return () => {
+      audioRef.current?.dispose()
+      audioRef.current = null
+    }
+  }, [])
+
+  useEffect(() => {
+    audioRef.current?.setMuted(isMuted)
+  }, [isMuted])
+
+  useEffect(() => {
+    if (mode === 'DEAD') {
+      audioRef.current?.setScene('death')
+    } else if (mode === 'ACTIVE') {
+      audioRef.current?.setScene('gameplay')
+    } else {
+      audioRef.current?.setScene('menu')
+    }
+  }, [mode])
+
+  useEffect(() => {
+    audioRef.current?.setIntensity(Math.min(elapsed / 30, 1))
+  }, [elapsed])
+  useEffect(() => {
+    const canvas = canvasRef.current
+    const ctx = canvas?.getContext('2d')
+    if (!canvas || !ctx) return undefined
+
+    let animationId = 0
+
+    function drawGrid() {
+      ctx.fillStyle = '#080812'
+      ctx.fillRect(0, 0, WIDTH, HEIGHT)
+
+      ctx.strokeStyle = 'rgba(130, 95, 210, 0.16)'
+      ctx.lineWidth = 1
+
+      for (let x = 0; x <= WIDTH; x += 24) {
+        ctx.beginPath()
+        ctx.moveTo(x, 0)
+        ctx.lineTo(x, HEIGHT)
+        ctx.stroke()
+      }
+
+      for (let y = 0; y <= HEIGHT; y += 24) {
+        ctx.beginPath()
+        ctx.moveTo(0, y)
+        ctx.lineTo(WIDTH, y)
+        ctx.stroke()
+      }
+
+      const glow = ctx.createRadialGradient(
+        WIDTH / 2, HEIGHT / 2, 20,
+        WIDTH / 2, HEIGHT / 2, 330,
+      )
+      glow.addColorStop(0, 'rgba(95, 40, 170, 0.12)')
+      glow.addColorStop(1, 'rgba(5, 5, 12, 0)')
+      ctx.fillStyle = glow
+      ctx.fillRect(0, 0, WIDTH, HEIGHT)
+    }
+
+    function drawTarget(box, color, lineWidth = 2) {
+      ctx.save()
+      ctx.strokeStyle = color
+      ctx.lineWidth = lineWidth
+      ctx.shadowColor = color
+      ctx.shadowBlur = 14
+      ctx.strokeRect(box.x, box.y, box.size, box.size)
+      ctx.shadowBlur = 0
+
+      const cx = box.x + box.size / 2
+      const cy = box.y + box.size / 2
+
+      ctx.lineWidth = 1
+      ctx.beginPath()
+      ctx.arc(cx, cy, 10, 0, Math.PI * 2)
+      ctx.stroke()
+
+      ctx.beginPath()
+      ctx.moveTo(cx - 17, cy)
+      ctx.lineTo(cx + 17, cy)
+      ctx.moveTo(cx, cy - 17)
+      ctx.lineTo(cx, cy + 17)
+      ctx.stroke()
+      ctx.restore()
+    }
+
+    function drawCursor() {
+      const cursor = cursorRef.current
+      if (cursor.x < 0 || cursor.y < 0) return
+
+      ctx.save()
+      ctx.fillStyle = '#ff3caa'
+      ctx.shadowColor = '#ff3caa'
+      ctx.shadowBlur = 12
+      ctx.beginPath()
+      ctx.arc(cursor.x, cursor.y, 4, 0, Math.PI * 2)
+      ctx.fill()
+      ctx.restore()
+    }
+
+    function drawLabel(text, y, color = '#f5f0ff', size = 13) {
+      ctx.save()
+      ctx.fillStyle = color
+      ctx.font = `900 ${size}px ui-monospace, monospace`
+      ctx.textAlign = 'center'
+      ctx.fillText(text, WIDTH / 2, y)
+      ctx.restore()
+    }
+
+    function finishRun(title, subtitle, time) {
+      audioRef.current?.death()
+      modeRef.current = 'DEAD'
+      setMode('DEAD')
+      const taunt = DEGEN_TAUNTS[Math.floor(Math.random() * DEGEN_TAUNTS.length)]
+      const resultTitle = time <= 0 ? title : taunt.title
+      const resultSubtitle = time <= 0 ? subtitle : taunt.subtitle
+      setResult({ title: resultTitle, subtitle: resultSubtitle, time })
+
+      if (time > 0) {
+        setBestTime((previousBest) => {
+          if (time <= previousBest) return previousBest
+
+          try {
+            window.localStorage.setItem('twitchtrap-best-time', String(time))
+          } catch {
+            // The game remains playable if browser storage is unavailable.
+          }
+
+          return time
+        })
+      }
+    }
+
+    function beginActiveRun(timestamp) {
+      audioRef.current?.lockIn()
+      modeRef.current = 'ACTIVE'
+      startRef.current = timestamp
+      lastHudSecondRef.current = -1
+      setMode('ACTIVE')
+    }
+
+    function frame(timestamp) {
+      drawGrid()
+
+      const currentMode = modeRef.current
+      let box = boxRef.current
+
+      if (currentMode === 'IDLE') {
+        box = { x: WIDTH / 2 - 55, y: HEIGHT / 2 - 55, size: 110 }
+        boxRef.current = box
+        drawTarget(box, '#9b72ff')
+        drawLabel('READY WHEN YOU ARE', 42, '#d6ff3f')
+        drawLabel('KEEP YOUR CURSOR INSIDE THE BOX', HEIGHT - 25, '#a5a2b5', 11)
+      }
+
+      if (currentMode === 'PREPARING') {
+        box = { x: WIDTH / 2 - 55, y: HEIGHT / 2 - 55, size: 110 }
+        boxRef.current = box
+        drawTarget(box, '#9b72ff')
+        drawLabel('PREPARING RUN...', 42, '#d6ff3f')
+        drawLabel('REQUESTING RUN CHALLENGE', HEIGHT - 25, '#a5a2b5', 11)
+        drawCursor()
+      }
+
+      if (currentMode === 'COUNTDOWN') {
+        const elapsedCountdown = (timestamp - startRef.current) / 1000
+        const remaining = Math.max(0, COUNTDOWN_SECONDS - elapsedCountdown)
+
+        box = { x: WIDTH / 2 - 55, y: HEIGHT / 2 - 55, size: 110 }
+        boxRef.current = box
+
+        const locked = isCursorInsideTarget(cursorRef.current, box)
+        drawTarget(box, locked ? '#00ff66' : '#ffcc00', 3)
+        drawLabel(`GET READY: ${remaining.toFixed(1)}s`, 42)
+        drawLabel(
+          locked ? 'TARGET LOCKED' : 'MOVE YOUR CURSOR INTO THE BOX',
+          HEIGHT - 25,
+          locked ? '#00ff66' : '#ffcc00',
+          11,
+        )
+        drawCursor()
+
+        if (remaining <= 0) {
+          if (!locked) {
+            finishRun(
+              'ELIMINATED',
+              'You left the target before the run began.',
+              0,
+            )
+          } else {
+            beginActiveRun(timestamp)
+          }
+        }
+      }
+
+      if (currentMode === 'ACTIVE' || modeRef.current === 'ACTIVE') {
+        const activeElapsed = Math.max(0, (timestamp - startRef.current) / 1000)
+        box = getTargetAtElapsed(activeElapsed)
+        const size = box.size
+        boxRef.current = box
+
+        drawTarget(box, '#00eaff')
+        drawCursor()
+
+        const cursor = cursorRef.current
+        const outOfBounds = !isCursorInsideTarget(cursor, box)
+
+        drawLabel(`SURVIVED ${activeElapsed.toFixed(2)}s`, 34, '#ffffff', 12)
+        drawLabel(
+          `TARGET SIZE ${Math.round(size)}px`,
+          HEIGHT - 20,
+          '#00eaff',
+          10,
+        )
+
+        const wholeSecond = Math.floor(activeElapsed)
+        if (wholeSecond !== lastHudSecondRef.current) {
+          lastHudSecondRef.current = wholeSecond
+          setElapsed(activeElapsed)
+          setMultiplier(1 + activeElapsed * 0.1)
+          audioRef.current?.runPulse(wholeSecond)
+        }
+
+        if (outOfBounds) {
+          finishRun('LIQUIDATED!', 'The target escaped you. Try again.', activeElapsed)
+        } else {
+          animationId = requestAnimationFrame(frame)
+          return
+        }
+      }
+
+      if (modeRef.current === 'DEAD') {
+        drawTarget(boxRef.current, '#ff3caa')
+        drawCursor()
+      }
+
+      animationId = requestAnimationFrame(frame)
+    }
+
+    animationId = requestAnimationFrame(frame)
+
+    return () => cancelAnimationFrame(animationId)
+  }, [])
+
+  function toggleMute() {
+    if (!audioRef.current?.isReady()) {
+      if (isMuted) {
+        setIsMuted(false)
+        try {
+          window.localStorage.setItem('twitchtrap-muted', 'false')
+        } catch {
+          // Audio remains available for this session.
+        }
+      }
+      void audioRef.current?.unlock()
+      return
+    }
+
+    setIsMuted((previous) => {
+      const next = !previous
+      try {
+        window.localStorage.setItem('twitchtrap-muted', String(next))
+      } catch {
+        // Mute still works for this session if storage is unavailable.
+      }
+      return next
+    })
+  }
+
+  function updateCursor(event) {
+    const canvas = canvasRef.current
+    if (!canvas) return
+
+    const rect = canvas.getBoundingClientRect()
+    cursorRef.current = {
+      x: ((event.clientX - rect.left) / rect.width) * WIDTH,
+      y: ((event.clientY - rect.top) / rect.height) * HEIGHT,
+    }
+  }
+
+  async function startGame() {
+    if (['PREPARING', 'COUNTDOWN', 'ACTIVE'].includes(modeRef.current)) return
+
+    audioRef.current?.unlock()
+    setElapsed(0)
+    setMultiplier(1)
+    setResult(null)
+    setVerificationStatus('local')
+
+    cursorRef.current = { x: -100, y: -100 }
+    boxRef.current = { x: WIDTH / 2 - 55, y: HEIGHT / 2 - 55, size: 110 }
+    startRef.current = performance.now()
+    lastHudSecondRef.current = -1
+    modeRef.current = 'COUNTDOWN'
+    setMode('COUNTDOWN')
+  }
+
+  const running =
+    mode === 'PREPARING' || mode === 'COUNTDOWN' || mode === 'ACTIVE'
+
+  return (
+    <section className="arcade-game" aria-label="TwitchTrap arcade game">
+      <div className="arcade-hud">
+        <div className="arcade-stat">
+          <span>SURVIVAL</span>
+          <strong>{elapsed.toFixed(2)}s</strong>
+        </div>
+        <div className="arcade-stat arcade-stat-center">
+          <span>DEMO MULTIPLIER</span>
+          <strong key={Math.floor(elapsed)} className="arcade-multiplier">{`x${multiplier.toFixed(2)}`}</strong>
+        </div>
+        <div className="arcade-stat arcade-stat-right">
+          <span>PERSONAL BEST</span>
+          <strong>{bestTime.toFixed(2)}s</strong>
+        </div>
+      </div>
+
+      <div className={`arcade-screen ${mode === 'DEAD' ? 'death-impact' : ''}`}>
+        <canvas
+          ref={canvasRef}
+          width={WIDTH}
+          height={HEIGHT}
+          onPointerMove={updateCursor}
+          aria-label="Move your cursor inside the moving target to survive"
+        />
+        <div
+          className={`death-flash ${mode === 'DEAD' ? 'active' : ''}`}
+          aria-hidden="true"
+        />
+
+        {mode === 'DEAD' && (
+          <div className="arcade-result" role="status">
+            <p className="arcade-result-kicker">RUN ENDED</p>
+            <h2>{result?.title}</h2>
+            <p>{result?.subtitle}</p>
+            <div className="arcade-result-stats">
+              <span>SURVIVAL TIME</span>
+              <strong>{(result?.time ?? 0).toFixed(3)}s</strong>
+            </div>
+            <button className="arcade-start-button" onClick={startGame}>
+              TRY AGAIN
+            </button>
+          </div>
+        )}
+      </div>
+
+      <div className="arcade-controls">
+        <div>
+          <strong>STAY IN THE BOX.</strong>
+          <p>The target moves faster and shrinks as time passes.</p>
+        </div>
+        <button
+          className="arcade-start-button"
+          onClick={startGame}
+          disabled={running}
+        >
+          {mode === 'PREPARING'
+            ? 'PREPARING RUN...'
+            : mode === 'COUNTDOWN'
+              ? 'GET READY...'
+              : mode === 'ACTIVE'
+                ? 'RUN IN PROGRESS'
+                : mode === 'DEAD'
+                  ? 'PLAY AGAIN'
+                  : 'START FREE RUN'}
+        </button>
+      </div>
+
+      <div className="arcade-audio-row">
+        <button
+          type="button"
+          className="arcade-mute-button"
+          onClick={toggleMute}
+          aria-pressed={isMuted}
+          aria-label={isMuted ? '\u266A SOUND OFF' : '\u266B SOUND ON'}
+        >
+          {isMuted ? 'SOUND OFF' : 'SOUND ON'}
+        </button>
+        <span className="arcade-audio-caption">
+          PROCEDURAL ARCADE AUDIO
+        </span>
+      </div>
+
+            <p className="arcade-safety-note">
+        LOCAL GAME DEMO | NO WALLET REQUIRED | NO PAYMENTS OR PRIZES | UNVERIFIED LOCAL RUN
+      </p>
+    </section>
+  )
+}
+

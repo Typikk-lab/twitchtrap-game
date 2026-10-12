@@ -1,0 +1,389 @@
+.arcade-game {
+  width: min(800px, 100%);
+  margin: 18px auto 0;
+  text-align: left;
+}
+
+.arcade-hud {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.arcade-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  min-width: 0;
+  padding: 13px 15px;
+  border: 1px solid rgba(155, 114, 255, 0.24);
+  background: rgba(17, 17, 27, 0.88);
+}
+
+.arcade-stat span {
+  color: #a5a2b5;
+  font-size: 0.58rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+}
+
+.arcade-stat strong {
+  overflow-wrap: anywhere;
+  color: #d6ff3f;
+  font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+  font-size: 1rem;
+}
+
+.arcade-stat-center {
+  text-align: center;
+}
+
+.arcade-stat-right {
+  text-align: right;
+}
+
+.arcade-stat strong.mode-live {
+  color: #00eaff;
+}
+
+.arcade-screen {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgba(155, 114, 255, 0.42);
+  background: #080812;
+  box-shadow: 0 0 38px rgba(110, 57, 205, 0.12);
+}
+
+.arcade-screen canvas {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 40 / 21;
+  cursor: crosshair;
+  touch-action: none;
+}
+
+.arcade-controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  margin-top: 13px;
+  padding: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  background: rgba(17, 17, 27, 0.75);
+}
+
+.arcade-controls strong {
+  color: #f4f0ff;
+  font-size: 0.75rem;
+  letter-spacing: 0.07em;
+}
+
+.arcade-controls p {
+  margin: 7px 0 0;
+  color: #a5a2b5;
+  font-size: 0.75rem;
+  line-height: 1.5;
+}
+
+.arcade-start-button {
+  flex-shrink: 0;
+  min-height: 44px;
+  padding: 0 18px;
+  border: 1px solid rgba(214, 255, 63, 0.55);
+  border-radius: 3px;
+  background: rgba(214, 255, 63, 0.1);
+  color: #d6ff3f;
+  cursor: pointer;
+  font-size: 0.66rem;
+  font-weight: 900;
+  letter-spacing: 0.06em;
+}
+
+.arcade-start-button:hover:not(:disabled) {
+  background: rgba(214, 255, 63, 0.18);
+}
+
+.arcade-start-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.arcade-safety-note {
+  margin: 13px 0 0;
+  color: #777487;
+  font-size: 0.58rem;
+  font-weight: 800;
+  letter-spacing: 0.09em;
+  line-height: 1.6;
+  text-align: center;
+}
+
+.arcade-result {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: rgba(8, 8, 18, 0.93);
+  text-align: center;
+}
+
+.arcade-result-kicker {
+  margin: 0 0 12px;
+  color: #ff3caa;
+  font-size: 0.65rem;
+  font-weight: 900;
+  letter-spacing: 0.2em;
+}
+
+.arcade-result h2 {
+  margin: 0;
+  color: #ff3caa;
+  font-size: clamp(1.5rem, 5vw, 2.8rem);
+  font-weight: 1000;
+  letter-spacing: -0.06em;
+}
+
+.arcade-result > p:not(.arcade-result-kicker) {
+  max-width: 420px;
+  color: #c2bed0;
+  font-size: 0.8rem;
+  line-height: 1.6;
+}
+
+.arcade-result-stats {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  margin: 9px 0 18px;
+}
+
+.arcade-result-stats span {
+  color: #a5a2b5;
+  font-size: 0.6rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+}
+
+.arcade-result-stats strong {
+  color: #d6ff3f;
+  font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+  font-size: 1.25rem;
+}
+
+@media (max-width: 560px) {
+  .arcade-game {
+    margin-top: 12px;
+  }
+
+  .arcade-hud {
+    gap: 5px;
+  }
+
+  .arcade-stat {
+    gap: 6px;
+    padding: 10px 7px;
+  }
+
+  .arcade-stat span {
+    font-size: 0.48rem;
+    letter-spacing: 0.04em;
+  }
+
+  .arcade-stat strong {
+    font-size: 0.8rem;
+  }
+
+  .arcade-controls {
+    align-items: stretch;
+    flex-direction: column;
+    gap: 13px;
+    padding: 13px;
+  }
+
+  .arcade-start-button {
+    width: 100%;
+  }
+
+  .arcade-result {
+    padding: 10px;
+  }
+
+  .arcade-result > p:not(.arcade-result-kicker) {
+    margin: 9px 0;
+    font-size: 0.7rem;
+  }
+
+  .arcade-result-stats {
+    margin: 4px 0 10px;
+  }
+}
+
+/* ===== CRT & VISUAL JUICE ===== */
+
+.arcade-screen {
+  isolation: isolate;
+}
+
+.arcade-screen::before,
+.arcade-screen::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.arcade-screen::before {
+  z-index: 11;
+  background:
+    radial-gradient(
+      ellipse at center,
+      transparent 38%,
+      rgba(0, 0, 0, 0.22) 72%,
+      rgba(0, 0, 0, 0.62) 100%
+    );
+  box-shadow:
+    inset 0 0 42px rgba(0, 240, 255, 0.08),
+    inset 0 0 65px rgba(255, 0, 119, 0.10);
+}
+
+.arcade-screen::after {
+  z-index: 12;
+  opacity: 0.55;
+  background: repeating-linear-gradient(
+    to bottom,
+    transparent 0px,
+    transparent 2px,
+    rgba(0, 0, 0, 0.19) 2px,
+    rgba(0, 0, 0, 0.19) 4px
+  );
+  background-size: 100% 100px;
+  animation: arcade-scanline-move 6s linear infinite;
+}
+
+@keyframes arcade-scanline-move {
+  from { background-position: 0 0; }
+  to { background-position: 0 100px; }
+}
+
+.arcade-screen canvas {
+  filter: drop-shadow(0 0 3px rgba(0, 240, 255, 0.08));
+}
+
+.arcade-screen.death-impact {
+  animation: arcade-hard-shake 0.4s cubic-bezier(.36,.07,.19,.97) both;
+}
+
+@keyframes arcade-hard-shake {
+  10%, 90% { transform: translate3d(-4px, -2px, 0); }
+  20%, 80% { transform: translate3d(6px, 3px, 0); }
+  30%, 50%, 70% { transform: translate3d(-8px, -3px, 0); }
+  40%, 60% { transform: translate3d(8px, 2px, 0); }
+}
+
+.arcade-screen.death-impact canvas {
+  animation: arcade-rgb-split 0.28s steps(2, end) both;
+}
+
+@keyframes arcade-rgb-split {
+  0% { filter: none; }
+  35% {
+    filter:
+      drop-shadow(-3px 0 rgba(255, 0, 85, 0.95))
+      drop-shadow(3px 0 rgba(0, 240, 255, 0.95));
+  }
+  100% { filter: none; }
+}
+
+.death-flash {
+  position: absolute;
+  z-index: 20;
+  inset: 0;
+  background: #ff0055;
+  opacity: 0;
+  pointer-events: none;
+  mix-blend-mode: screen;
+}
+
+.death-flash.active {
+  animation: arcade-death-flash 0.35s ease-out both;
+}
+
+@keyframes arcade-death-flash {
+  0% { opacity: 0.78; }
+  35% { opacity: 0.36; }
+  100% { opacity: 0; }
+}
+
+.arcade-result {
+  z-index: 30;
+}
+
+.arcade-multiplier {
+  display: inline-block;
+  transform-origin: center;
+}
+
+@keyframes arcade-multiplier-pop {
+  0% { transform: scale(1); }
+  45% { transform: scale(1.22); }
+  100% { transform: scale(1); }
+}
+
+.arcade-multiplier {
+  animation: arcade-multiplier-pop 0.24s ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .arcade-screen::after,
+  .arcade-screen.death-impact,
+  .arcade-screen.death-impact canvas,
+  .death-flash.active,
+  .arcade-multiplier {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+}
+/* ===== PROCEDURAL ARCADE AUDIO CONTROL ===== */
+.arcade-audio-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 13px;
+}
+
+.arcade-mute-button {
+  min-height: 34px;
+  padding: 0 12px;
+  border: 1px solid rgba(0, 234, 255, 0.35);
+  border-radius: 3px;
+  background: rgba(0, 234, 255, 0.06);
+  color: #00eaff;
+  cursor: pointer;
+  font-size: 0.62rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+}
+
+.arcade-mute-button:hover {
+  background: rgba(0, 234, 255, 0.14);
+}
+
+.arcade-audio-caption {
+  color: #777487;
+  font-size: 0.55rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+}
+
+@media (max-width: 420px) {
+  .arcade-audio-row {
+    flex-wrap: wrap;
+  }
+}

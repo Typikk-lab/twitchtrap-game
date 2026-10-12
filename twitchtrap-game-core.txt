@@ -1,0 +1,1265 @@
+
+========== FILE: package.json ==========
+{
+  "name": "twitchtrap-game",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.117.3",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^6.1.2",
+    "vite": "^8.3.4",
+    "vitest": "^5.0.3"
+  }
+}
+
+
+========== FILE: src\App.jsx ==========
+import { useState } from 'react'
+import { useWallet } from './lib/useWallet.js'
+import ArcadeGame from './game/ArcadeGame.jsx'
+import Leaderboard from './components/Leaderboard.jsx'
+
+export default function App() {
+  const [walletMenuOpen, setWalletMenuOpen] = useState(false)
+
+  const {
+    providers,
+    walletName,
+    address,
+    shortAddress,
+    busy,
+    error,
+    connect,
+    disconnect,
+  } = useWallet()
+
+  async function selectWallet(walletId) {
+    setWalletMenuOpen(false)
+    await connect(walletId)
+  }
+
+  async function handleDisconnect() {
+    await disconnect()
+  }
+
+  return (
+    <main className="app-shell">
+      <header className="topbar">
+        <a className="brand" href="/" aria-label="TwitchTrap home">
+          <span className="brand-mark">T</span>
+          <span className="brand-name">TWITCH<span>TRAP</span></span>
+        </a>
+
+        <div className="header-actions">
+          <div className="network-status">
+            <span className="status-dot" />
+            <span>LOCAL ARCADE / DEMO</span>
+          </div>
+
+          {address ? (
+            <button
+              className="wallet-button wallet-connected"
+              onClick={handleDisconnect}
+              disabled={busy}
+              title={`${walletName}: ${address}. Click to disconnect.`}
+            >
+              <span className="wallet-indicator" />
+              {busy ? 'DISCONNECTING...' : shortAddress}
+            </button>
+          ) : (
+            <div className="wallet-menu">
+              <button
+                className="wallet-button"
+                disabled={busy || providers.length === 0}
+                onClick={() => setWalletMenuOpen((open) => !open)}
+                aria-expanded={walletMenuOpen}
+                aria-haspopup="true"
+                title={
+                  providers.length === 0
+                    ? 'No supported browser wallet detected'
+                    : 'Choose a browser wallet'
+                }
+              >
+                {busy ? 'CONNECTING...' : 'WALLET PREVIEW'}
+              </button>
+
+              {walletMenuOpen && providers.length > 0 && (
+                <div className="wallet-options" role="menu">
+                  {providers.map((item) => (
+                    <button
+                      key={item.id}
+                      className="wallet-option"
+                      role="menuitem"
+                      onClick={() => selectWallet(item.id)}
+                      disabled={busy}
+                    >
+                      {item.name}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      </header>
+
+      <section className="hero">
+        <div className="intro-line">
+          <span className="eyebrow"><span className="eyebrow-star">✦</span> THE DEGEN ARCADE <span className="eyebrow-star">✦</span></span>
+          <h1>ONE BOX. <span>NO MERCY.</span></h1>
+          <p>Keep your cursor inside. The trap keeps moving. Don't blink.</p>
+        </div>
+
+        <section className="cabinet" aria-label="TwitchTrap arcade cabinet">
+          <div className="cabinet-rivet rivet-tl" />
+          <div className="cabinet-rivet rivet-tr" />
+
+          <div className="cabinet-marquee">
+            <div className="marquee-side">PLAYER<br />01</div>
+            <div className="marquee-center">
+              <div className="marquee-title">TWITCHTRAP</div>
+              <div className="marquee-sub">✦ &nbsp; SURVIVE THE TRAP &nbsp; ✦</div>
+            </div>
+            <div className="marquee-side marquee-ready"><span />READY<br />TO PLAY</div>
+          </div>
+
+          <div className="cabinet-bezel">
+            <div className="bezel-topline">
+              <span>CRT DISPLAY // TT-001</span>
+              <span className="bezel-live"><i /> SYSTEM ONLINE</span>
+            </div>
+
+            <ArcadeGame />
+
+            <div className="cabinet-system-log">
+              <span className="log-prompt">&gt;_</span>
+              <span>FREE PLAY ENABLED</span>
+              <span className="log-divider">/</span>
+              <span>NO COINS REQUIRED</span>
+              <span className="log-end">[ LOCAL SESSION ]</span>
+            </div>
+          </div>
+
+          <div className="cabinet-deck">
+            <div className="deck-brand">
+              <span className="deck-brand-symbol">TT</span>
+              <span>ARCADE<br /><strong>CONTROL DECK</strong></span>
+            </div>
+
+            <div className="deck-buttons" aria-label="Arcade cabinet decoration">
+              <span className="deck-button pink" title="Decorative arcade button" />
+              <span className="deck-button cyan" title="Decorative arcade button" />
+              <span className="deck-button gold" title="Decorative arcade button" />
+              <span className="deck-button purple" title="Decorative arcade button" />
+            </div>
+
+            <div className="deck-status">
+              <span><i className="led-pink" /> PWR</span>
+              <span><i className="led-cyan" /> DEMO</span>
+              <span><i className="led-gold" /> FREE</span>
+            </div>
+          </div>
+
+          <div className="cabinet-bottom">
+            <span>TWITCHTRAP INDUSTRIES</span>
+            <span>BUILT FOR THE CHRONICALLY ONLINE</span>
+            <span>V.01 / FREE DEMO</span>
+          </div>
+
+          <div className="cabinet-rivet rivet-bl" />
+          <div className="cabinet-rivet rivet-br" />
+        </section>
+
+        <div className="under-cabinet">
+          <span><i /> NO WALLET REQUIRED</span>
+          <span><i /> NO PAYMENTS OR PRIZES</span>
+          <span><i /> PERSONAL BEST SAVED LOCALLY</span>
+        </div>
+
+        {error && <p className="wallet-error" role="alert">{error}</p>}
+
+        {address && (
+          <div className="wallet-card">
+            <span className="wallet-card-label">WALLET PREVIEW CONNECTED</span>
+            <strong>{walletName}</strong>
+            <code>{address}</code>
+            <span className="wallet-card-note">
+              Connecting a wallet does not affect gameplay or authorize transactions.
+            </span>
+          </div>
+        )}
+      </section>
+
+      <Leaderboard />
+
+      <footer className="footer">
+        <span>TT / 001</span>
+        <span>TWITCHTRAP ARCADE</span>
+        <span>INSERT SKILL, NOT COINS <b>✦</b></span>
+      </footer>
+    </main>
+  )
+}
+
+
+========== FILE: src\game\ArcadeGame.jsx ==========
+import { useEffect, useRef, useState } from 'react'
+import './ArcadeGame.css'
+import { createAudioEngine } from './audio.js'
+import {
+  GAME_HEIGHT as HEIGHT,
+  GAME_WIDTH as WIDTH,
+  getTargetAtElapsed,
+  isCursorInsideTarget,
+} from './arcadeRules.js'
+
+const COUNTDOWN_SECONDS = 3
+
+const DEGEN_TAUNTS = [
+  { title: 'BRO GOT LIQUIDATED', subtitle: 'The target was literally right there.' },
+  { title: 'SKILL ISSUE DETECTED', subtitle: 'Your hands have paper hands.' },
+  { title: 'ABSOLUTE CINEMA', subtitle: 'Thirty seconds of confidence. One frame of consequences.' },
+  { title: 'NGMI.', subtitle: 'The trap remains undefeated. Your comeback is pending.' },
+  { title: 'EXIT LIQUIDITY FOUND', subtitle: 'You were the liquidity.' },
+  { title: 'WITNESSED. RECORDED. MOCKED.', subtitle: 'The replay is going straight to the group chat.' },
+  { title: 'TOUCH GRASS? YOU TOUCHED DEATH.', subtitle: 'The box said stay inside. You chose freedom.' },
+  { title: 'BRO FUMBLED THE BAG', subtitle: 'A generational fumble in real time.' },
+  { title: 'NPC MOVEMENT DETECTED', subtitle: 'Even the tutorial is disappointed.' },
+  { title: 'PACK IT UP', subtitle: 'The run is over. The screenshots are forever.' },
+]
+
+export default function ArcadeGame() {
+  const canvasRef = useRef(null)
+  const audioRef = useRef(null)
+  const [isMuted, setIsMuted] = useState(() => {
+    try {
+      return window.localStorage.getItem('twitchtrap-muted') === 'true'
+    } catch {
+      return false
+    }
+  })
+  const modeRef = useRef('IDLE')
+  const cursorRef = useRef({ x: -100, y: -100 })
+  const startRef = useRef(0)
+  const lastHudSecondRef = useRef(-1)
+  const boxRef = useRef({ x: 345, y: 155, size: 110 })
+
+  const [mode, setMode] = useState('IDLE')
+  const [elapsed, setElapsed] = useState(0)
+  const [multiplier, setMultiplier] = useState(1)
+  const [result, setResult] = useState(null)
+  const [verificationStatus, setVerificationStatus] = useState('local')
+  const [bestTime, setBestTime] = useState(() => {
+    try {
+      return Number(window.localStorage.getItem('twitchtrap-best-time')) || 0
+    } catch {
+      return 0
+    }
+  })
+
+  useEffect(() => {
+    audioRef.current = createAudioEngine()
+    audioRef.current.setMuted(isMuted)
+
+    return () => {
+      audioRef.current?.dispose()
+      audioRef.current = null
+    }
+  }, [])
+
+  useEffect(() => {
+    audioRef.current?.setMuted(isMuted)
+  }, [isMuted])
+
+  useEffect(() => {
+    if (mode === 'DEAD') {
+      audioRef.current?.setScene('death')
+    } else if (mode === 'ACTIVE') {
+      audioRef.current?.setScene('gameplay')
+    } else {
+      audioRef.current?.setScene('menu')
+    }
+  }, [mode])
+
+  useEffect(() => {
+    audioRef.current?.setIntensity(Math.min(elapsed / 30, 1))
+  }, [elapsed])
+  useEffect(() => {
+    const canvas = canvasRef.current
+    const ctx = canvas?.getContext('2d')
+    if (!canvas || !ctx) return undefined
+
+    let animationId = 0
+
+    function drawGrid() {
+      ctx.fillStyle = '#080812'
+      ctx.fillRect(0, 0, WIDTH, HEIGHT)
+
+      ctx.strokeStyle = 'rgba(130, 95, 210, 0.16)'
+      ctx.lineWidth = 1
+
+      for (let x = 0; x <= WIDTH; x += 24) {
+        ctx.beginPath()
+        ctx.moveTo(x, 0)
+        ctx.lineTo(x, HEIGHT)
+        ctx.stroke()
+      }
+
+      for (let y = 0; y <= HEIGHT; y += 24) {
+        ctx.beginPath()
+        ctx.moveTo(0, y)
+        ctx.lineTo(WIDTH, y)
+        ctx.stroke()
+      }
+
+      const glow = ctx.createRadialGradient(
+        WIDTH / 2, HEIGHT / 2, 20,
+        WIDTH / 2, HEIGHT / 2, 330,
+      )
+      glow.addColorStop(0, 'rgba(95, 40, 170, 0.12)')
+      glow.addColorStop(1, 'rgba(5, 5, 12, 0)')
+      ctx.fillStyle = glow
+      ctx.fillRect(0, 0, WIDTH, HEIGHT)
+    }
+
+    function drawTarget(box, color, lineWidth = 2) {
+      ctx.save()
+      ctx.strokeStyle = color
+      ctx.lineWidth = lineWidth
+      ctx.shadowColor = color
+      ctx.shadowBlur = 14
+      ctx.strokeRect(box.x, box.y, box.size, box.size)
+      ctx.shadowBlur = 0
+
+      const cx = box.x + box.size / 2
+      const cy = box.y + box.size / 2
+
+      ctx.lineWidth = 1
+      ctx.beginPath()
+      ctx.arc(cx, cy, 10, 0, Math.PI * 2)
+      ctx.stroke()
+
+      ctx.beginPath()
+      ctx.moveTo(cx - 17, cy)
+      ctx.lineTo(cx + 17, cy)
+      ctx.moveTo(cx, cy - 17)
+      ctx.lineTo(cx, cy + 17)
+      ctx.stroke()
+      ctx.restore()
+    }
+
+    function drawCursor() {
+      const cursor = cursorRef.current
+      if (cursor.x < 0 || cursor.y < 0) return
+
+      ctx.save()
+      ctx.fillStyle = '#ff3caa'
+      ctx.shadowColor = '#ff3caa'
+      ctx.shadowBlur = 12
+      ctx.beginPath()
+      ctx.arc(cursor.x, cursor.y, 4, 0, Math.PI * 2)
+      ctx.fill()
+      ctx.restore()
+    }
+
+    function drawLabel(text, y, color = '#f5f0ff', size = 13) {
+      ctx.save()
+      ctx.fillStyle = color
+      ctx.font = `900 ${size}px ui-monospace, monospace`
+      ctx.textAlign = 'center'
+      ctx.fillText(text, WIDTH / 2, y)
+      ctx.restore()
+    }
+
+    function finishRun(title, subtitle, time) {
+      audioRef.current?.death()
+      modeRef.current = 'DEAD'
+      setMode('DEAD')
+      const taunt = DEGEN_TAUNTS[Math.floor(Math.random() * DEGEN_TAUNTS.length)]
+      const resultTitle = time <= 0 ? title : taunt.title
+      const resultSubtitle = time <= 0 ? subtitle : taunt.subtitle
+      setResult({ title: resultTitle, subtitle: resultSubtitle, time })
+
+      if (time > 0) {
+        setBestTime((previousBest) => {
+          if (time <= previousBest) return previousBest
+
+          try {
+            window.localStorage.setItem('twitchtrap-best-time', String(time))
+          } catch {
+            // The game remains playable if browser storage is unavailable.
+          }
+
+          return time
+        })
+      }
+    }
+
+    function beginActiveRun(timestamp) {
+      audioRef.current?.lockIn()
+      modeRef.current = 'ACTIVE'
+      startRef.current = timestamp
+      lastHudSecondRef.current = -1
+      setMode('ACTIVE')
+    }
+
+    function frame(timestamp) {
+      drawGrid()
+
+      const currentMode = modeRef.current
+      let box = boxRef.current
+
+      if (currentMode === 'IDLE') {
+        box = { x: WIDTH / 2 - 55, y: HEIGHT / 2 - 55, size: 110 }
+        boxRef.current = box
+        drawTarget(box, '#9b72ff')
+        drawLabel('READY WHEN YOU ARE', 42, '#d6ff3f')
+        drawLabel('KEEP YOUR CURSOR INSIDE THE BOX', HEIGHT - 25, '#a5a2b5', 11)
+      }
+
+      if (currentMode === 'PREPARING') {
+        box = { x: WIDTH / 2 - 55, y: HEIGHT / 2 - 55, size: 110 }
+        boxRef.current = box
+        drawTarget(box, '#9b72ff')
+        drawLabel('PREPARING RUN...', 42, '#d6ff3f')
+        drawLabel('REQUESTING RUN CHALLENGE', HEIGHT - 25, '#a5a2b5', 11)
+        drawCursor()
+      }
+
+      if (currentMode === 'COUNTDOWN') {
+        const elapsedCountdown = (timestamp - startRef.current) / 1000
+        const remaining = Math.max(0, COUNTDOWN_SECONDS - elapsedCountdown)
+
+        box = { x: WIDTH / 2 - 55, y: HEIGHT / 2 - 55, size: 110 }
+        boxRef.current = box
+
+        const locked = isCursorInsideTarget(cursorRef.current, box)
+        drawTarget(box, locked ? '#00ff66' : '#ffcc00', 3)
+        drawLabel(`GET READY: ${remaining.toFixed(1)}s`, 42)
+        drawLabel(
+          locked ? 'TARGET LOCKED' : 'MOVE YOUR CURSOR INTO THE BOX',
+          HEIGHT - 25,
+          locked ? '#00ff66' : '#ffcc00',
+          11,
+        )
+        drawCursor()
+
+        if (remaining <= 0) {
+          if (!locked) {
+            finishRun(
+              'ELIMINATED',
+              'You left the target before the run began.',
+              0,
+            )
+          } else {
+            beginActiveRun(timestamp)
+          }
+        }
+      }
+
+      if (currentMode === 'ACTIVE' || modeRef.current === 'ACTIVE') {
+        const activeElapsed = Math.max(0, (timestamp - startRef.current) / 1000)
+        box = getTargetAtElapsed(activeElapsed)
+        const size = box.size
+        boxRef.current = box
+
+        drawTarget(box, '#00eaff')
+        drawCursor()
+
+        const cursor = cursorRef.current
+        const outOfBounds = !isCursorInsideTarget(cursor, box)
+
+        drawLabel(`SURVIVED ${activeElapsed.toFixed(2)}s`, 34, '#ffffff', 12)
+        drawLabel(
+          `TARGET SIZE ${Math.round(size)}px`,
+          HEIGHT - 20,
+          '#00eaff',
+          10,
+        )
+
+        const wholeSecond = Math.floor(activeElapsed)
+        if (wholeSecond !== lastHudSecondRef.current) {
+          lastHudSecondRef.current = wholeSecond
+          setElapsed(activeElapsed)
+          setMultiplier(1 + activeElapsed * 0.1)
+          audioRef.current?.runPulse(wholeSecond)
+        }
+
+        if (outOfBounds) {
+          finishRun('LIQUIDATED!', 'The target escaped you. Try again.', activeElapsed)
+        } else {
+          animationId = requestAnimationFrame(frame)
+          return
+        }
+      }
+
+      if (modeRef.current === 'DEAD') {
+        drawTarget(boxRef.current, '#ff3caa')
+        drawCursor()
+      }
+
+      animationId = requestAnimationFrame(frame)
+    }
+
+    animationId = requestAnimationFrame(frame)
+
+    return () => cancelAnimationFrame(animationId)
+  }, [])
+
+  function toggleMute() {
+    if (!audioRef.current?.isReady()) {
+      if (isMuted) {
+        setIsMuted(false)
+        try {
+          window.localStorage.setItem('twitchtrap-muted', 'false')
+        } catch {
+          // Audio remains available for this session.
+        }
+      }
+      void audioRef.current?.unlock()
+      return
+    }
+
+    setIsMuted((previous) => {
+      const next = !previous
+      try {
+        window.localStorage.setItem('twitchtrap-muted', String(next))
+      } catch {
+        // Mute still works for this session if storage is unavailable.
+      }
+      return next
+    })
+  }
+
+  function updateCursor(event) {
+    const canvas = canvasRef.current
+    if (!canvas) return
+
+    const rect = canvas.getBoundingClientRect()
+    cursorRef.current = {
+      x: ((event.clientX - rect.left) / rect.width) * WIDTH,
+      y: ((event.clientY - rect.top) / rect.height) * HEIGHT,
+    }
+  }
+
+  async function startGame() {
+    if (['PREPARING', 'COUNTDOWN', 'ACTIVE'].includes(modeRef.current)) return
+
+    audioRef.current?.unlock()
+    setElapsed(0)
+    setMultiplier(1)
+    setResult(null)
+    setVerificationStatus('local')
+
+    cursorRef.current = { x: -100, y: -100 }
+    boxRef.current = { x: WIDTH / 2 - 55, y: HEIGHT / 2 - 55, size: 110 }
+    startRef.current = performance.now()
+    lastHudSecondRef.current = -1
+    modeRef.current = 'COUNTDOWN'
+    setMode('COUNTDOWN')
+  }
+
+  const running =
+    mode === 'PREPARING' || mode === 'COUNTDOWN' || mode === 'ACTIVE'
+
+  return (
+    <section className="arcade-game" aria-label="TwitchTrap arcade game">
+      <div className="arcade-hud">
+        <div className="arcade-stat">
+          <span>SURVIVAL</span>
+          <strong>{elapsed.toFixed(2)}s</strong>
+        </div>
+        <div className="arcade-stat arcade-stat-center">
+          <span>DEMO MULTIPLIER</span>
+          <strong key={Math.floor(elapsed)} className="arcade-multiplier">{`x${multiplier.toFixed(2)}`}</strong>
+        </div>
+        <div className="arcade-stat arcade-stat-right">
+          <span>PERSONAL BEST</span>
+          <strong>{bestTime.toFixed(2)}s</strong>
+        </div>
+      </div>
+
+      <div className={`arcade-screen ${mode === 'DEAD' ? 'death-impact' : ''}`}>
+        <canvas
+          ref={canvasRef}
+          width={WIDTH}
+          height={HEIGHT}
+          onPointerMove={updateCursor}
+          aria-label="Move your cursor inside the moving target to survive"
+        />
+        <div
+          className={`death-flash ${mode === 'DEAD' ? 'active' : ''}`}
+          aria-hidden="true"
+        />
+
+        {mode === 'DEAD' && (
+          <div className="arcade-result" role="status">
+            <p className="arcade-result-kicker">RUN ENDED</p>
+            <h2>{result?.title}</h2>
+            <p>{result?.subtitle}</p>
+            <div className="arcade-result-stats">
+              <span>SURVIVAL TIME</span>
+              <strong>{(result?.time ?? 0).toFixed(3)}s</strong>
+            </div>
+            <button className="arcade-start-button" onClick={startGame}>
+              TRY AGAIN
+            </button>
+          </div>
+        )}
+      </div>
+
+      <div className="arcade-controls">
+        <div>
+          <strong>STAY IN THE BOX.</strong>
+          <p>The target moves faster and shrinks as time passes.</p>
+        </div>
+        <button
+          className="arcade-start-button"
+          onClick={startGame}
+          disabled={running}
+        >
+          {mode === 'PREPARING'
+            ? 'PREPARING RUN...'
+            : mode === 'COUNTDOWN'
+              ? 'GET READY...'
+              : mode === 'ACTIVE'
+                ? 'RUN IN PROGRESS'
+                : mode === 'DEAD'
+                  ? 'PLAY AGAIN'
+                  : 'START FREE RUN'}
+        </button>
+      </div>
+
+      <div className="arcade-audio-row">
+        <button
+          type="button"
+          className="arcade-mute-button"
+          onClick={toggleMute}
+          aria-pressed={isMuted}
+          aria-label={isMuted ? '\u266A SOUND OFF' : '\u266B SOUND ON'}
+        >
+          {isMuted ? 'SOUND OFF' : 'SOUND ON'}
+        </button>
+        <span className="arcade-audio-caption">
+          PROCEDURAL ARCADE AUDIO
+        </span>
+      </div>
+
+            <p className="arcade-safety-note">
+        LOCAL GAME DEMO | NO WALLET REQUIRED | NO PAYMENTS OR PRIZES | UNVERIFIED LOCAL RUN
+      </p>
+    </section>
+  )
+}
+
+
+========== FILE: src\game\ArcadeGame.css ==========
+.arcade-game {
+  width: 100%;
+  margin: 0;
+  color: #f8efff;
+  text-align: left;
+}
+
+.arcade-hud {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 9px;
+}
+
+.arcade-stat {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 6px;
+  min-width: 0;
+  min-height: 59px;
+  padding: 10px 12px;
+  border: 1px solid rgba(173,120,255,.35);
+  background:
+    linear-gradient(140deg, rgba(173,120,255,.09), transparent 70%),
+    #100a19;
+  box-shadow: inset 0 0 12px rgba(0,0,0,.22);
+}
+
+.arcade-stat span {
+  color: #a99ab9;
+  font-family: Silkscreen, monospace;
+  font-size: 7px;
+  font-weight: 400;
+  letter-spacing: .04em;
+}
+
+.arcade-stat strong {
+  overflow-wrap: anywhere;
+  color: #ffd166;
+  font-family: Silkscreen, ui-monospace, monospace;
+  font-size: clamp(10px, 1.35vw, 15px);
+  line-height: 1.4;
+}
+
+.arcade-stat-center { text-align: center; border-color: rgba(0,234,255,.32); }
+.arcade-stat-center strong { color: #00eaff; }
+.arcade-stat-right { text-align: right; }
+.arcade-stat strong.mode-live { color: #00eaff; }
+
+.arcade-screen {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  border: 2px solid #5d3477;
+  border-radius: 3px;
+  background: #080812;
+  box-shadow:
+    inset 0 0 0 3px #0b0611,
+    inset 0 0 30px rgba(0,0,0,.75),
+    0 0 0 1px rgba(255,56,184,.1),
+    0 0 22px rgba(0,234,255,.07);
+}
+
+.arcade-screen canvas {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 40 / 21;
+  cursor: crosshair;
+  touch-action: none;
+}
+
+.arcade-screen::before,
+.arcade-screen::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.arcade-screen::before {
+  z-index: 11;
+  background: radial-gradient(ellipse at center, transparent 42%, rgba(0,0,0,.22) 76%, rgba(0,0,0,.48) 100%);
+  box-shadow: inset 0 0 35px rgba(0,234,255,.06), inset 0 0 45px rgba(255,0,119,.08);
+}
+
+.arcade-screen::after {
+  z-index: 12;
+  opacity: .4;
+  background: repeating-linear-gradient(to bottom, transparent 0, transparent 2px, rgba(0,0,0,.2) 3px, rgba(0,0,0,.2) 4px);
+  animation: arcade-scanline-move 8s linear infinite;
+}
+
+@keyframes arcade-scanline-move {
+  from { background-position: 0 0; }
+  to { background-position: 0 100px; }
+}
+
+.arcade-screen canvas { filter: drop-shadow(0 0 3px rgba(0,240,255,.08)); }
+
+.arcade-controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-top: 9px;
+  padding: 12px;
+  border: 1px solid rgba(173,120,255,.26);
+  background: linear-gradient(110deg, rgba(255,56,184,.055), transparent 55%), #100a19;
+}
+
+.arcade-controls > div { min-width: 0; }
+
+.arcade-controls strong {
+  color: #ffe7f6;
+  font-family: Silkscreen, monospace;
+  font-size: 9px;
+  letter-spacing: .015em;
+}
+
+.arcade-controls p {
+  margin: 6px 0 0;
+  color: #a99ab9;
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+.arcade-start-button {
+  flex: 0 0 auto;
+  min-height: 43px;
+  padding: 0 17px;
+  border: 1px solid #ff70cb;
+  border-radius: 3px;
+  background: linear-gradient(180deg, #ff4dbf, #c91b84);
+  box-shadow: 0 3px 0 #71144f, 0 0 16px rgba(255,56,184,.14), inset 0 1px 0 rgba(255,255,255,.32);
+  color: #21091b;
+  cursor: pointer;
+  font-family: Silkscreen, monospace;
+  font-size: 9px;
+  font-weight: 700;
+  line-height: 1.5;
+  text-align: center;
+  transition: filter .15s ease, transform .15s ease;
+}
+
+.arcade-start-button:hover:not(:disabled) { filter: brightness(1.13); transform: translateY(-1px); }
+.arcade-start-button:active:not(:disabled) { transform: translateY(2px); box-shadow: 0 1px 0 #71144f; }
+.arcade-start-button:disabled { cursor: not-allowed; opacity: .62; filter: saturate(.55); }
+
+.arcade-audio-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 9px;
+}
+
+.arcade-mute-button {
+  min-height: 32px;
+  padding: 0 11px;
+  border: 1px solid rgba(0,234,255,.4);
+  border-radius: 3px;
+  background: rgba(0,234,255,.06);
+  color: #00eaff;
+  cursor: pointer;
+  font-family: Silkscreen, monospace;
+  font-size: 8px;
+}
+
+.arcade-mute-button:hover { background: rgba(0,234,255,.13); }
+
+.arcade-audio-caption {
+  color: #82718f;
+  font-family: Silkscreen, monospace;
+  font-size: 7px;
+  letter-spacing: .03em;
+  text-align: right;
+}
+
+.arcade-safety-note {
+  margin: 9px 0 0;
+  color: #8e7d9d;
+  font-size: 8px;
+  font-weight: 800;
+  letter-spacing: .07em;
+  line-height: 1.6;
+  text-align: center;
+}
+
+.arcade-result {
+  position: absolute;
+  z-index: 30;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  overflow-y: auto;
+  padding: 16px;
+  background: rgba(8,4,15,.93);
+  text-align: center;
+}
+
+.arcade-result-kicker {
+  margin: 0 0 8px;
+  color: #00eaff;
+  font-family: Silkscreen, monospace;
+  font-size: 8px;
+  letter-spacing: .15em;
+}
+
+.arcade-result h2 {
+  margin: 0;
+  color: #ff38b8;
+  font-family: Silkscreen, monospace;
+  font-size: clamp(15px, 3.7vw, 30px);
+  font-weight: 700;
+  line-height: 1.5;
+  letter-spacing: -.04em;
+  text-shadow: 0 0 16px rgba(255,56,184,.4);
+}
+
+.arcade-result > p:not(.arcade-result-kicker) {
+  max-width: 420px;
+  margin: 8px 0;
+  color: #d2c3df;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.arcade-result-stats {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  margin: 6px 0 13px;
+}
+
+.arcade-result-stats span {
+  color: #a99ab9;
+  font-family: Silkscreen, monospace;
+  font-size: 7px;
+}
+
+.arcade-result-stats strong {
+  color: #ffd166;
+  font-family: Silkscreen, monospace;
+  font-size: 16px;
+}
+
+.arcade-screen.death-impact { animation: arcade-hard-shake .4s cubic-bezier(.36,.07,.19,.97) both; }
+
+@keyframes arcade-hard-shake {
+  10%,90% { transform: translate3d(-3px,-2px,0); }
+  20%,80% { transform: translate3d(5px,2px,0); }
+  30%,50%,70% { transform: translate3d(-6px,-2px,0); }
+  40%,60% { transform: translate3d(6px,2px,0); }
+}
+
+.arcade-screen.death-impact canvas { animation: arcade-rgb-split .28s steps(2,end) both; }
+
+@keyframes arcade-rgb-split {
+  0%,100% { filter: none; }
+  35% { filter: drop-shadow(-3px 0 rgba(255,0,85,.9)) drop-shadow(3px 0 rgba(0,240,255,.9)); }
+}
+
+.death-flash {
+  position: absolute;
+  z-index: 20;
+  inset: 0;
+  background: #ff0055;
+  opacity: 0;
+  pointer-events: none;
+  mix-blend-mode: screen;
+}
+.death-flash.active { animation: arcade-death-flash .35s ease-out both; }
+@keyframes arcade-death-flash {
+  0% { opacity: .72; }
+  35% { opacity: .3; }
+  100% { opacity: 0; }
+}
+
+.arcade-multiplier { display: inline-block; transform-origin: center; animation: arcade-multiplier-pop .24s ease-out; }
+@keyframes arcade-multiplier-pop {
+  0% { transform: scale(1); }
+  45% { transform: scale(1.16); }
+  100% { transform: scale(1); }
+}
+
+@media (max-width: 560px) {
+  .arcade-hud { gap: 4px; margin-bottom: 6px; }
+  .arcade-stat { min-height: 51px; gap: 5px; padding: 7px 5px; }
+  .arcade-stat span { font-size: 6px; letter-spacing: 0; }
+  .arcade-stat strong { font-size: clamp(8px, 2.5vw, 12px); }
+  .arcade-screen { border-width: 1px; }
+  .arcade-controls { align-items: stretch; flex-direction: column; gap: 10px; padding: 10px; }
+  .arcade-controls strong { font-size: 8px; }
+  .arcade-controls p { font-size: 11px; }
+  .arcade-start-button { width: 100%; min-height: 41px; }
+  .arcade-result { padding: 8px; }
+  .arcade-result-kicker { margin-bottom: 4px; }
+  .arcade-result > p:not(.arcade-result-kicker) { margin: 5px 0; font-size: 10px; }
+  .arcade-result-stats { margin: 4px 0 8px; }
+  .arcade-result-stats strong { font-size: 13px; }
+  .arcade-audio-row { gap: 7px; }
+  .arcade-mute-button { min-height: 30px; font-size: 7px; }
+  .arcade-audio-caption { font-size: 6px; }
+  .arcade-safety-note { font-size: 7px; }
+}
+
+@media (max-width: 360px) {
+  .arcade-stat { padding: 6px 3px; }
+  .arcade-stat span { font-size: 5px; }
+  .arcade-controls strong { font-size: 7px; }
+  .arcade-audio-caption { max-width: 120px; line-height: 1.5; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .arcade-screen::after,
+  .arcade-screen.death-impact,
+  .arcade-screen.death-impact canvas,
+  .death-flash.active,
+  .arcade-multiplier {
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+}
+
+========== FILE: src\game\arcadeRules.js ==========
+export const GAME_WIDTH = 800
+export const GAME_HEIGHT = 420
+export const MAX_RAMP_SECONDS = 30
+
+export function getTargetAtElapsed(elapsedSeconds) {
+  if (!Number.isFinite(elapsedSeconds)) {
+    throw new TypeError('Elapsed time must be a finite number')
+  }
+
+  const elapsed = Math.max(0, elapsedSeconds)
+  const ramp = Math.min(elapsed / MAX_RAMP_SECONDS, 1)
+  const size = Math.max(45, 110 - ramp * 65)
+  const speed = 0.6 + ramp * 2.1
+  const ampX = 70 + ramp * 80
+  const ampY = 40 + ramp * 50
+  const centerX = GAME_WIDTH / 2 - size / 2
+  const centerY = GAME_HEIGHT / 2 - size / 2
+
+  return {
+    x: centerX + Math.sin(elapsed * speed) * ampX,
+    y: centerY + Math.sin(elapsed * speed * 1.3) * ampY,
+    size,
+  }
+}
+
+export function isCursorInsideTarget(cursor, target) {
+  if (
+    !cursor ||
+    !target ||
+    !Number.isFinite(cursor.x) ||
+    !Number.isFinite(cursor.y) ||
+    !Number.isFinite(target.x) ||
+    !Number.isFinite(target.y) ||
+    !Number.isFinite(target.size) ||
+    target.size < 0
+  ) {
+    return false
+  }
+
+  return (
+    cursor.x >= target.x &&
+    cursor.x <= target.x + target.size &&
+    cursor.y >= target.y &&
+    cursor.y <= target.y + target.size
+  )
+}
+
+
+========== FILE: src\game\arcadeRules.test.js ==========
+import { describe, expect, it } from 'vitest'
+import {
+  GAME_HEIGHT,
+  GAME_WIDTH,
+  getTargetAtElapsed,
+  isCursorInsideTarget,
+} from './arcadeRules.js'
+
+describe('getTargetAtElapsed', () => {
+  it('returns the existing centered target at the start', () => {
+    expect(getTargetAtElapsed(0)).toEqual({
+      x: 345,
+      y: 155,
+      size: 110,
+    })
+  })
+
+  it('shrinks the target during the first 30 seconds', () => {
+    expect(getTargetAtElapsed(15).size).toBe(77.5)
+    expect(getTargetAtElapsed(30).size).toBe(45)
+  })
+
+  it('keeps the minimum target size after the ramp finishes', () => {
+    expect(getTargetAtElapsed(60).size).toBe(45)
+  })
+
+  it('treats negative elapsed time as the starting position', () => {
+    expect(getTargetAtElapsed(-1)).toEqual(getTargetAtElapsed(0))
+  })
+
+  it.each([NaN, Infinity, -Infinity])(
+    'rejects invalid elapsed time: %s',
+    (elapsed) => {
+      expect(() => getTargetAtElapsed(elapsed)).toThrow(
+        'Elapsed time must be a finite number',
+      )
+    },
+  )
+
+  it('returns finite target coordinates at representative times', () => {
+    for (const elapsed of [0, 1, 5, 15, 30, 60, 300]) {
+      const target = getTargetAtElapsed(elapsed)
+
+      expect(Number.isFinite(target.x)).toBe(true)
+      expect(Number.isFinite(target.y)).toBe(true)
+      expect(target.size).toBeGreaterThanOrEqual(45)
+      expect(target.size).toBeLessThanOrEqual(110)
+    }
+  })
+
+  it('uses the expected canvas dimensions', () => {
+    expect(GAME_WIDTH).toBe(800)
+    expect(GAME_HEIGHT).toBe(420)
+  })
+})
+
+describe('isCursorInsideTarget', () => {
+  const target = { x: 100, y: 80, size: 50 }
+
+  it('accepts a cursor inside the target', () => {
+    expect(isCursorInsideTarget({ x: 120, y: 100 }, target)).toBe(true)
+  })
+
+  it('accepts points exactly on the target boundary', () => {
+    expect(isCursorInsideTarget({ x: 100, y: 80 }, target)).toBe(true)
+    expect(isCursorInsideTarget({ x: 150, y: 130 }, target)).toBe(true)
+  })
+
+  it('rejects a cursor outside any edge', () => {
+    expect(isCursorInsideTarget({ x: 99.9, y: 100 }, target)).toBe(false)
+    expect(isCursorInsideTarget({ x: 150.1, y: 100 }, target)).toBe(false)
+    expect(isCursorInsideTarget({ x: 120, y: 79.9 }, target)).toBe(false)
+    expect(isCursorInsideTarget({ x: 120, y: 130.1 }, target)).toBe(false)
+  })
+
+  it('rejects missing or non-finite cursor coordinates', () => {
+    expect(isCursorInsideTarget(null, target)).toBe(false)
+    expect(isCursorInsideTarget({ x: NaN, y: 100 }, target)).toBe(false)
+    expect(isCursorInsideTarget({ x: 100, y: Infinity }, target)).toBe(false)
+  })
+
+  it('rejects invalid targets', () => {
+    expect(isCursorInsideTarget({ x: 120, y: 100 }, null)).toBe(false)
+    expect(
+      isCursorInsideTarget({ x: 120, y: 100 }, {
+        x: 100,
+        y: 80,
+        size: -1,
+      }),
+    ).toBe(false)
+  })
+})
+
+
+
+========== FILE: src\components\Leaderboard.jsx ==========
+import { useEffect, useState } from 'react'
+import { supabase } from '../lib/supabase.js'
+import './Leaderboard.css'
+
+function formatTime(value) {
+  const seconds = Number(value)
+  return Number.isFinite(seconds) ? `${seconds.toFixed(3)}s` : '—'
+}
+
+export default function Leaderboard() {
+  const [scores, setScores] = useState([])
+  const [status, setStatus] = useState('loading')
+
+  useEffect(() => {
+    let active = true
+
+    async function loadScores() {
+      if (!supabase) {
+        if (active) setStatus('config')
+        return
+      }
+
+      const { data, error } = await supabase
+        .from('arcade_scores')
+        .select('display_name, survival_seconds, created_at')
+        .eq('verified', true)
+        .order('survival_seconds', { ascending: false })
+        .limit(10)
+
+      if (!active) return
+
+      if (error) {
+        console.error('Leaderboard could not be loaded:', error.message)
+        setStatus('error')
+        return
+      }
+
+      setScores(data ?? [])
+      setStatus(data?.length ? 'ready' : 'empty')
+    }
+
+    loadScores()
+
+    return () => {
+      active = false
+    }
+  }, [])
+
+  return (
+    <section className="leaderboard" aria-labelledby="leaderboard-title">
+      <div className="leaderboard-header">
+        <div>
+          <p className="leaderboard-kicker">GLOBAL RANKINGS // TT-001</p>
+          <h2 id="leaderboard-title">THE SURVIVORS</h2>
+          <p className="leaderboard-description">
+            Ten longest verified runs. No shortcuts.
+          </p>
+        </div>
+        <div className="leaderboard-live">
+          <span aria-hidden="true" />
+          VERIFIED
+        </div>
+      </div>
+
+      <div className="leaderboard-columns" aria-hidden="true">
+        <span>RANK / PLAYER</span>
+        <span>SURVIVAL TIME</span>
+      </div>
+
+      {status === 'loading' && (
+        <p className="leaderboard-message" role="status">
+          CONNECTING TO THE SCOREBOARD...
+        </p>
+      )}
+
+      {status === 'config' && (
+        <p className="leaderboard-message" role="status">
+          SCOREBOARD CONFIGURATION REQUIRED.
+        </p>
+      )}
+
+      {status === 'error' && (
+        <p className="leaderboard-message" role="status">
+          SCOREBOARD TEMPORARILY OFFLINE. TRY AGAIN LATER.
+        </p>
+      )}
+
+      {status === 'empty' && (
+        <div className="leaderboard-empty">
+          <span className="leaderboard-empty-mark" aria-hidden="true">+</span>
+          <strong>NO VERIFIED RUNS YET</strong>
+          <p>The first verified survivors will appear here.</p>
+        </div>
+      )}
+
+      {status === 'ready' && (
+        <ol className="leaderboard-list">
+          {scores.map((score, index) => (
+            <li
+              className={`leaderboard-row${index === 0 ? ' leaderboard-first' : ''}`}
+              key={`${score.created_at}-${index}`}
+            >
+              <div className="leaderboard-player">
+                <span className="leaderboard-rank">
+                  {String(index + 1).padStart(2, '0')}
+                </span>
+                <span className="leaderboard-player-name">
+                  {score.display_name || 'ANONYMOUS'}
+                </span>
+              </div>
+              <strong className="leaderboard-time">
+                {formatTime(score.survival_seconds)}
+              </strong>
+            </li>
+          ))}
+        </ol>
+      )}
+
+      <div className="leaderboard-footer">
+        <span>FREE PLAY ONLY</span>
+        <span>CLIENT SUBMISSIONS DISABLED</span>
+      </div>
+    </section>
+  )
+}

@@ -1,0 +1,3444 @@
+TWITCHTRAP LOCAL SOURCE SNAPSHOT
+Generated: 2026-10-12T11:14:43.6416443+03:00
+Repository: https://github.com/Typikk-lab/twitchtrap-game.git
+
+
+======================== FILE: package.json ========================
+{
+  "name": "twitchtrap-game",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.117.3",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^6.1.2",
+    "vite": "^8.3.4",
+    "vitest": "^5.0.3"
+  }
+}
+
+
+======================== FILE: src/App.jsx ========================
+import { useState } from 'react'
+import { useWallet } from './lib/useWallet.js'
+import ArcadeGame from './game/ArcadeGame.jsx'
+import Leaderboard from './components/Leaderboard.jsx'
+
+export default function App() {
+  const [walletMenuOpen, setWalletMenuOpen] = useState(false)
+
+  const {
+    providers,
+    walletName,
+    address,
+    shortAddress,
+    busy,
+    error,
+    connect,
+    disconnect,
+  } = useWallet()
+
+  async function selectWallet(walletId) {
+    setWalletMenuOpen(false)
+    await connect(walletId)
+  }
+
+  async function handleDisconnect() {
+    await disconnect()
+  }
+
+  return (
+    <main className="app-shell">
+      <header className="topbar">
+        <a className="brand" href="/" aria-label="TwitchTrap home">
+          <span className="brand-mark">T</span>
+          <span className="brand-name">TWITCH<span>TRAP</span></span>
+        </a>
+
+        <div className="header-actions">
+          <div className="network-status">
+            <span className="status-dot" />
+            <span>LOCAL ARCADE / DEMO</span>
+          </div>
+
+          {address ? (
+            <button
+              className="wallet-button wallet-connected"
+              onClick={handleDisconnect}
+              disabled={busy}
+              title={`${walletName}: ${address}. Click to disconnect.`}
+            >
+              <span className="wallet-indicator" />
+              {busy ? 'DISCONNECTING...' : shortAddress}
+            </button>
+          ) : (
+            <div className="wallet-menu">
+              <button
+                className="wallet-button"
+                disabled={busy || providers.length === 0}
+                onClick={() => setWalletMenuOpen((open) => !open)}
+                aria-expanded={walletMenuOpen}
+                aria-haspopup="true"
+                title={
+                  providers.length === 0
+                    ? 'No supported browser wallet detected'
+                    : 'Choose a browser wallet'
+                }
+              >
+                {busy ? 'CONNECTING...' : 'WALLET PREVIEW'}
+              </button>
+
+              {walletMenuOpen && providers.length > 0 && (
+                <div className="wallet-options" role="menu">
+                  {providers.map((item) => (
+                    <button
+                      key={item.id}
+                      className="wallet-option"
+                      role="menuitem"
+                      onClick={() => selectWallet(item.id)}
+                      disabled={busy}
+                    >
+                      {item.name}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      </header>
+
+      <section className="hero">
+        <div className="intro-line">
+          <span className="eyebrow"><span className="eyebrow-star">✦</span> THE DEGEN ARCADE <span className="eyebrow-star">✦</span></span>
+          <h1>ONE BOX. <span>NO MERCY.</span></h1>
+          <p>Keep your cursor inside. The trap keeps moving. Don't blink.</p>
+        </div>
+
+        <section className="cabinet" aria-label="TwitchTrap arcade cabinet">
+          <div className="cabinet-rivet rivet-tl" />
+          <div className="cabinet-rivet rivet-tr" />
+
+          <div className="cabinet-marquee">
+            <div className="marquee-side">PLAYER<br />01</div>
+            <div className="marquee-center">
+              <div className="marquee-title">TWITCHTRAP</div>
+              <div className="marquee-sub">✦ &nbsp; SURVIVE THE TRAP &nbsp; ✦</div>
+            </div>
+            <div className="marquee-side marquee-ready"><span />READY<br />TO PLAY</div>
+          </div>
+
+          <div className="cabinet-bezel">
+            <div className="bezel-topline">
+              <span>CRT DISPLAY // TT-001</span>
+              <span className="bezel-live"><i /> SYSTEM ONLINE</span>
+            </div>
+
+            <ArcadeGame />
+
+            <div className="cabinet-system-log">
+              <span className="log-prompt">&gt;_</span>
+              <span>FREE PLAY ENABLED</span>
+              <span className="log-divider">/</span>
+              <span>NO COINS REQUIRED</span>
+              <span className="log-end">[ LOCAL SESSION ]</span>
+            </div>
+          </div>
+
+          <div className="cabinet-deck">
+            <div className="deck-brand">
+              <span className="deck-brand-symbol">TT</span>
+              <span>ARCADE<br /><strong>CONTROL DECK</strong></span>
+            </div>
+
+            <div className="deck-buttons" aria-label="Arcade cabinet decoration">
+              <span className="deck-button pink" title="Decorative arcade button" />
+              <span className="deck-button cyan" title="Decorative arcade button" />
+              <span className="deck-button gold" title="Decorative arcade button" />
+              <span className="deck-button purple" title="Decorative arcade button" />
+            </div>
+
+            <div className="deck-status">
+              <span><i className="led-pink" /> PWR</span>
+              <span><i className="led-cyan" /> DEMO</span>
+              <span><i className="led-gold" /> FREE</span>
+            </div>
+          </div>
+
+          <div className="cabinet-bottom">
+            <span>TWITCHTRAP INDUSTRIES</span>
+            <span>BUILT FOR THE CHRONICALLY ONLINE</span>
+            <span>V.01 / FREE DEMO</span>
+          </div>
+
+          <div className="cabinet-rivet rivet-bl" />
+          <div className="cabinet-rivet rivet-br" />
+        </section>
+
+        <div className="under-cabinet">
+          <span><i /> NO WALLET REQUIRED</span>
+          <span><i /> NO PAYMENTS OR PRIZES</span>
+          <span><i /> PERSONAL BEST SAVED LOCALLY</span>
+        </div>
+
+        {error && <p className="wallet-error" role="alert">{error}</p>}
+
+        {address && (
+          <div className="wallet-card">
+            <span className="wallet-card-label">WALLET PREVIEW CONNECTED</span>
+            <strong>{walletName}</strong>
+            <code>{address}</code>
+            <span className="wallet-card-note">
+              Connecting a wallet does not affect gameplay or authorize transactions.
+            </span>
+          </div>
+        )}
+      </section>
+
+      <Leaderboard />
+
+      <footer className="footer">
+        <span>TT / 001</span>
+        <span>TWITCHTRAP ARCADE</span>
+        <span>INSERT SKILL, NOT COINS <b>✦</b></span>
+      </footer>
+    </main>
+  )
+}
+
+
+======================== FILE: src/game/ArcadeGame.css ========================
+.arcade-game {
+  width: 100%;
+  margin: 0;
+  color: #f8efff;
+  text-align: left;
+}
+
+.arcade-hud {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 9px;
+}
+
+.arcade-stat {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 6px;
+  min-width: 0;
+  min-height: 59px;
+  padding: 10px 12px;
+  border: 1px solid rgba(173,120,255,.35);
+  background:
+    linear-gradient(140deg, rgba(173,120,255,.09), transparent 70%),
+    #100a19;
+  box-shadow: inset 0 0 12px rgba(0,0,0,.22);
+}
+
+.arcade-stat span {
+  color: #a99ab9;
+  font-family: Silkscreen, monospace;
+  font-size: 7px;
+  font-weight: 400;
+  letter-spacing: .04em;
+}
+
+.arcade-stat strong {
+  overflow-wrap: anywhere;
+  color: #ffd166;
+  font-family: Silkscreen, ui-monospace, monospace;
+  font-size: clamp(10px, 1.35vw, 15px);
+  line-height: 1.4;
+}
+
+.arcade-stat-center { text-align: center; border-color: rgba(0,234,255,.32); }
+.arcade-stat-center strong { color: #00eaff; }
+.arcade-stat-right { text-align: right; }
+.arcade-stat strong.mode-live { color: #00eaff; }
+
+.arcade-screen {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  border: 2px solid #5d3477;
+  border-radius: 3px;
+  background: #080812;
+  box-shadow:
+    inset 0 0 0 3px #0b0611,
+    inset 0 0 30px rgba(0,0,0,.75),
+    0 0 0 1px rgba(255,56,184,.1),
+    0 0 22px rgba(0,234,255,.07);
+}
+
+.arcade-screen canvas {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 40 / 21;
+  cursor: crosshair;
+  touch-action: none;
+}
+
+.arcade-screen::before,
+.arcade-screen::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.arcade-screen::before {
+  z-index: 11;
+  background: radial-gradient(ellipse at center, transparent 42%, rgba(0,0,0,.22) 76%, rgba(0,0,0,.48) 100%);
+  box-shadow: inset 0 0 35px rgba(0,234,255,.06), inset 0 0 45px rgba(255,0,119,.08);
+}
+
+.arcade-screen::after {
+  z-index: 12;
+  opacity: .4;
+  background: repeating-linear-gradient(to bottom, transparent 0, transparent 2px, rgba(0,0,0,.2) 3px, rgba(0,0,0,.2) 4px);
+  animation: arcade-scanline-move 8s linear infinite;
+}
+
+@keyframes arcade-scanline-move {
+  from { background-position: 0 0; }
+  to { background-position: 0 100px; }
+}
+
+.arcade-screen canvas { filter: drop-shadow(0 0 3px rgba(0,240,255,.08)); }
+
+.arcade-controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-top: 9px;
+  padding: 12px;
+  border: 1px solid rgba(173,120,255,.26);
+  background: linear-gradient(110deg, rgba(255,56,184,.055), transparent 55%), #100a19;
+}
+
+.arcade-controls > div { min-width: 0; }
+
+.arcade-controls strong {
+  color: #ffe7f6;
+  font-family: Silkscreen, monospace;
+  font-size: 9px;
+  letter-spacing: .015em;
+}
+
+.arcade-controls p {
+  margin: 6px 0 0;
+  color: #a99ab9;
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+.arcade-start-button {
+  flex: 0 0 auto;
+  min-height: 43px;
+  padding: 0 17px;
+  border: 1px solid #ff70cb;
+  border-radius: 3px;
+  background: linear-gradient(180deg, #ff4dbf, #c91b84);
+  box-shadow: 0 3px 0 #71144f, 0 0 16px rgba(255,56,184,.14), inset 0 1px 0 rgba(255,255,255,.32);
+  color: #21091b;
+  cursor: pointer;
+  font-family: Silkscreen, monospace;
+  font-size: 9px;
+  font-weight: 700;
+  line-height: 1.5;
+  text-align: center;
+  transition: filter .15s ease, transform .15s ease;
+}
+
+.arcade-start-button:hover:not(:disabled) { filter: brightness(1.13); transform: translateY(-1px); }
+.arcade-start-button:active:not(:disabled) { transform: translateY(2px); box-shadow: 0 1px 0 #71144f; }
+.arcade-start-button:disabled { cursor: not-allowed; opacity: .62; filter: saturate(.55); }
+
+.arcade-audio-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 9px;
+}
+
+.arcade-mute-button {
+  min-height: 32px;
+  padding: 0 11px;
+  border: 1px solid rgba(0,234,255,.4);
+  border-radius: 3px;
+  background: rgba(0,234,255,.06);
+  color: #00eaff;
+  cursor: pointer;
+  font-family: Silkscreen, monospace;
+  font-size: 8px;
+}
+
+.arcade-mute-button:hover { background: rgba(0,234,255,.13); }
+
+.arcade-audio-caption {
+  color: #82718f;
+  font-family: Silkscreen, monospace;
+  font-size: 7px;
+  letter-spacing: .03em;
+  text-align: right;
+}
+
+.arcade-safety-note {
+  margin: 9px 0 0;
+  color: #8e7d9d;
+  font-size: 8px;
+  font-weight: 800;
+  letter-spacing: .07em;
+  line-height: 1.6;
+  text-align: center;
+}
+
+.arcade-result {
+  position: absolute;
+  z-index: 30;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  overflow-y: auto;
+  padding: 16px;
+  background: rgba(8,4,15,.93);
+  text-align: center;
+}
+
+.arcade-result-kicker {
+  margin: 0 0 8px;
+  color: #00eaff;
+  font-family: Silkscreen, monospace;
+  font-size: 8px;
+  letter-spacing: .15em;
+}
+
+.arcade-result h2 {
+  margin: 0;
+  color: #ff38b8;
+  font-family: Silkscreen, monospace;
+  font-size: clamp(15px, 3.7vw, 30px);
+  font-weight: 700;
+  line-height: 1.5;
+  letter-spacing: -.04em;
+  text-shadow: 0 0 16px rgba(255,56,184,.4);
+}
+
+.arcade-result > p:not(.arcade-result-kicker) {
+  max-width: 420px;
+  margin: 8px 0;
+  color: #d2c3df;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.arcade-result-stats {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  margin: 6px 0 13px;
+}
+
+.arcade-result-stats span {
+  color: #a99ab9;
+  font-family: Silkscreen, monospace;
+  font-size: 7px;
+}
+
+.arcade-result-stats strong {
+  color: #ffd166;
+  font-family: Silkscreen, monospace;
+  font-size: 16px;
+}
+
+.arcade-screen.death-impact { animation: arcade-hard-shake .4s cubic-bezier(.36,.07,.19,.97) both; }
+
+@keyframes arcade-hard-shake {
+  10%,90% { transform: translate3d(-3px,-2px,0); }
+  20%,80% { transform: translate3d(5px,2px,0); }
+  30%,50%,70% { transform: translate3d(-6px,-2px,0); }
+  40%,60% { transform: translate3d(6px,2px,0); }
+}
+
+.arcade-screen.death-impact canvas { animation: arcade-rgb-split .28s steps(2,end) both; }
+
+@keyframes arcade-rgb-split {
+  0%,100% { filter: none; }
+  35% { filter: drop-shadow(-3px 0 rgba(255,0,85,.9)) drop-shadow(3px 0 rgba(0,240,255,.9)); }
+}
+
+.death-flash {
+  position: absolute;
+  z-index: 20;
+  inset: 0;
+  background: #ff0055;
+  opacity: 0;
+  pointer-events: none;
+  mix-blend-mode: screen;
+}
+.death-flash.active { animation: arcade-death-flash .35s ease-out both; }
+@keyframes arcade-death-flash {
+  0% { opacity: .72; }
+  35% { opacity: .3; }
+  100% { opacity: 0; }
+}
+
+.arcade-multiplier { display: inline-block; transform-origin: center; animation: arcade-multiplier-pop .24s ease-out; }
+@keyframes arcade-multiplier-pop {
+  0% { transform: scale(1); }
+  45% { transform: scale(1.16); }
+  100% { transform: scale(1); }
+}
+
+@media (max-width: 560px) {
+  .arcade-hud { gap: 4px; margin-bottom: 6px; }
+  .arcade-stat { min-height: 51px; gap: 5px; padding: 7px 5px; }
+  .arcade-stat span { font-size: 6px; letter-spacing: 0; }
+  .arcade-stat strong { font-size: clamp(8px, 2.5vw, 12px); }
+  .arcade-screen { border-width: 1px; }
+  .arcade-controls { align-items: stretch; flex-direction: column; gap: 10px; padding: 10px; }
+  .arcade-controls strong { font-size: 8px; }
+  .arcade-controls p { font-size: 11px; }
+  .arcade-start-button { width: 100%; min-height: 41px; }
+  .arcade-result { padding: 8px; }
+  .arcade-result-kicker { margin-bottom: 4px; }
+  .arcade-result > p:not(.arcade-result-kicker) { margin: 5px 0; font-size: 10px; }
+  .arcade-result-stats { margin: 4px 0 8px; }
+  .arcade-result-stats strong { font-size: 13px; }
+  .arcade-audio-row { gap: 7px; }
+  .arcade-mute-button { min-height: 30px; font-size: 7px; }
+  .arcade-audio-caption { font-size: 6px; }
+  .arcade-safety-note { font-size: 7px; }
+}
+
+@media (max-width: 360px) {
+  .arcade-stat { padding: 6px 3px; }
+  .arcade-stat span { font-size: 5px; }
+  .arcade-controls strong { font-size: 7px; }
+  .arcade-audio-caption { max-width: 120px; line-height: 1.5; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .arcade-screen::after,
+  .arcade-screen.death-impact,
+  .arcade-screen.death-impact canvas,
+  .death-flash.active,
+  .arcade-multiplier {
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+}
+
+======================== FILE: src/game/ArcadeGame.jsx ========================
+import { useEffect, useRef, useState } from 'react'
+import './ArcadeGame.css'
+import { createAudioEngine } from './audio.js'
+import {
+  GAME_HEIGHT as HEIGHT,
+  GAME_WIDTH as WIDTH,
+  getTargetAtElapsed,
+  isCursorInsideTarget,
+} from './arcadeRules.js'
+
+const COUNTDOWN_SECONDS = 3
+
+const DEGEN_TAUNTS = [
+  { title: 'BRO GOT LIQUIDATED', subtitle: 'The target was literally right there.' },
+  { title: 'SKILL ISSUE DETECTED', subtitle: 'Your hands have paper hands.' },
+  { title: 'ABSOLUTE CINEMA', subtitle: 'Thirty seconds of confidence. One frame of consequences.' },
+  { title: 'NGMI.', subtitle: 'The trap remains undefeated. Your comeback is pending.' },
+  { title: 'EXIT LIQUIDITY FOUND', subtitle: 'You were the liquidity.' },
+  { title: 'WITNESSED. RECORDED. MOCKED.', subtitle: 'The replay is going straight to the group chat.' },
+  { title: 'TOUCH GRASS? YOU TOUCHED DEATH.', subtitle: 'The box said stay inside. You chose freedom.' },
+  { title: 'BRO FUMBLED THE BAG', subtitle: 'A generational fumble in real time.' },
+  { title: 'NPC MOVEMENT DETECTED', subtitle: 'Even the tutorial is disappointed.' },
+  { title: 'PACK IT UP', subtitle: 'The run is over. The screenshots are forever.' },
+]
+
+export default function ArcadeGame() {
+  const canvasRef = useRef(null)
+  const audioRef = useRef(null)
+  const [isMuted, setIsMuted] = useState(() => {
+    try {
+      return window.localStorage.getItem('twitchtrap-muted') === 'true'
+    } catch {
+      return false
+    }
+  })
+  const modeRef = useRef('IDLE')
+  const cursorRef = useRef({ x: -100, y: -100 })
+  const startRef = useRef(0)
+  const lastHudSecondRef = useRef(-1)
+  const boxRef = useRef({ x: 345, y: 155, size: 110 })
+
+  const [mode, setMode] = useState('IDLE')
+  const [elapsed, setElapsed] = useState(0)
+  const [multiplier, setMultiplier] = useState(1)
+  const [result, setResult] = useState(null)
+  const [verificationStatus, setVerificationStatus] = useState('local')
+  const [bestTime, setBestTime] = useState(() => {
+    try {
+      return Number(window.localStorage.getItem('twitchtrap-best-time')) || 0
+    } catch {
+      return 0
+    }
+  })
+
+  useEffect(() => {
+    audioRef.current = createAudioEngine()
+    audioRef.current.setMuted(isMuted)
+
+    return () => {
+      audioRef.current?.dispose()
+      audioRef.current = null
+    }
+  }, [])
+
+  useEffect(() => {
+    audioRef.current?.setMuted(isMuted)
+  }, [isMuted])
+
+  useEffect(() => {
+    if (mode === 'DEAD') {
+      audioRef.current?.setScene('death')
+    } else if (mode === 'ACTIVE') {
+      audioRef.current?.setScene('gameplay')
+    } else {
+      audioRef.current?.setScene('menu')
+    }
+  }, [mode])
+
+  useEffect(() => {
+    audioRef.current?.setIntensity(Math.min(elapsed / 30, 1))
+  }, [elapsed])
+  useEffect(() => {
+    const canvas = canvasRef.current
+    const ctx = canvas?.getContext('2d')
+    if (!canvas || !ctx) return undefined
+
+    let animationId = 0
+
+    function drawGrid() {
+      ctx.fillStyle = '#080812'
+      ctx.fillRect(0, 0, WIDTH, HEIGHT)
+
+      ctx.strokeStyle = 'rgba(130, 95, 210, 0.16)'
+      ctx.lineWidth = 1
+
+      for (let x = 0; x <= WIDTH; x += 24) {
+        ctx.beginPath()
+        ctx.moveTo(x, 0)
+        ctx.lineTo(x, HEIGHT)
+        ctx.stroke()
+      }
+
+      for (let y = 0; y <= HEIGHT; y += 24) {
+        ctx.beginPath()
+        ctx.moveTo(0, y)
+        ctx.lineTo(WIDTH, y)
+        ctx.stroke()
+      }
+
+      const glow = ctx.createRadialGradient(
+        WIDTH / 2, HEIGHT / 2, 20,
+        WIDTH / 2, HEIGHT / 2, 330,
+      )
+      glow.addColorStop(0, 'rgba(95, 40, 170, 0.12)')
+      glow.addColorStop(1, 'rgba(5, 5, 12, 0)')
+      ctx.fillStyle = glow
+      ctx.fillRect(0, 0, WIDTH, HEIGHT)
+    }
+
+    function drawTarget(box, color, lineWidth = 2) {
+      ctx.save()
+      ctx.strokeStyle = color
+      ctx.lineWidth = lineWidth
+      ctx.shadowColor = color
+      ctx.shadowBlur = 14
+      ctx.strokeRect(box.x, box.y, box.size, box.size)
+      ctx.shadowBlur = 0
+
+      const cx = box.x + box.size / 2
+      const cy = box.y + box.size / 2
+
+      ctx.lineWidth = 1
+      ctx.beginPath()
+      ctx.arc(cx, cy, 10, 0, Math.PI * 2)
+      ctx.stroke()
+
+      ctx.beginPath()
+      ctx.moveTo(cx - 17, cy)
+      ctx.lineTo(cx + 17, cy)
+      ctx.moveTo(cx, cy - 17)
+      ctx.lineTo(cx, cy + 17)
+      ctx.stroke()
+      ctx.restore()
+    }
+
+    function drawCursor() {
+      const cursor = cursorRef.current
+      if (cursor.x < 0 || cursor.y < 0) return
+
+      ctx.save()
+      ctx.fillStyle = '#ff3caa'
+      ctx.shadowColor = '#ff3caa'
+      ctx.shadowBlur = 12
+      ctx.beginPath()
+      ctx.arc(cursor.x, cursor.y, 4, 0, Math.PI * 2)
+      ctx.fill()
+      ctx.restore()
+    }
+
+    function drawLabel(text, y, color = '#f5f0ff', size = 13) {
+      ctx.save()
+      ctx.fillStyle = color
+      ctx.font = `900 ${size}px ui-monospace, monospace`
+      ctx.textAlign = 'center'
+      ctx.fillText(text, WIDTH / 2, y)
+      ctx.restore()
+    }
+
+    function finishRun(title, subtitle, time) {
+      audioRef.current?.death()
+      modeRef.current = 'DEAD'
+      setMode('DEAD')
+      const taunt = DEGEN_TAUNTS[Math.floor(Math.random() * DEGEN_TAUNTS.length)]
+      const resultTitle = time <= 0 ? title : taunt.title
+      const resultSubtitle = time <= 0 ? subtitle : taunt.subtitle
+      setResult({ title: resultTitle, subtitle: resultSubtitle, time })
+
+      if (time > 0) {
+        setBestTime((previousBest) => {
+          if (time <= previousBest) return previousBest
+
+          try {
+            window.localStorage.setItem('twitchtrap-best-time', String(time))
+          } catch {
+            // The game remains playable if browser storage is unavailable.
+          }
+
+          return time
+        })
+      }
+    }
+
+    function beginActiveRun(timestamp) {
+      audioRef.current?.lockIn()
+      modeRef.current = 'ACTIVE'
+      startRef.current = timestamp
+      lastHudSecondRef.current = -1
+      setMode('ACTIVE')
+    }
+
+    function frame(timestamp) {
+      drawGrid()
+
+      const currentMode = modeRef.current
+      let box = boxRef.current
+
+      if (currentMode === 'IDLE') {
+        box = { x: WIDTH / 2 - 55, y: HEIGHT / 2 - 55, size: 110 }
+        boxRef.current = box
+        drawTarget(box, '#9b72ff')
+        drawLabel('READY WHEN YOU ARE', 42, '#d6ff3f')
+        drawLabel('KEEP YOUR CURSOR INSIDE THE BOX', HEIGHT - 25, '#a5a2b5', 11)
+      }
+
+      if (currentMode === 'PREPARING') {
+        box = { x: WIDTH / 2 - 55, y: HEIGHT / 2 - 55, size: 110 }
+        boxRef.current = box
+        drawTarget(box, '#9b72ff')
+        drawLabel('PREPARING RUN...', 42, '#d6ff3f')
+        drawLabel('REQUESTING RUN CHALLENGE', HEIGHT - 25, '#a5a2b5', 11)
+        drawCursor()
+      }
+
+      if (currentMode === 'COUNTDOWN') {
+        const elapsedCountdown = (timestamp - startRef.current) / 1000
+        const remaining = Math.max(0, COUNTDOWN_SECONDS - elapsedCountdown)
+
+        box = { x: WIDTH / 2 - 55, y: HEIGHT / 2 - 55, size: 110 }
+        boxRef.current = box
+
+        const locked = isCursorInsideTarget(cursorRef.current, box)
+        drawTarget(box, locked ? '#00ff66' : '#ffcc00', 3)
+        drawLabel(`GET READY: ${remaining.toFixed(1)}s`, 42)
+        drawLabel(
+          locked ? 'TARGET LOCKED' : 'MOVE YOUR CURSOR INTO THE BOX',
+          HEIGHT - 25,
+          locked ? '#00ff66' : '#ffcc00',
+          11,
+        )
+        drawCursor()
+
+        if (remaining <= 0) {
+          if (!locked) {
+            finishRun(
+              'ELIMINATED',
+              'You left the target before the run began.',
+              0,
+            )
+          } else {
+            beginActiveRun(timestamp)
+          }
+        }
+      }
+
+      if (currentMode === 'ACTIVE' || modeRef.current === 'ACTIVE') {
+        const activeElapsed = Math.max(0, (timestamp - startRef.current) / 1000)
+        box = getTargetAtElapsed(activeElapsed)
+        const size = box.size
+        boxRef.current = box
+
+        drawTarget(box, '#00eaff')
+        drawCursor()
+
+        const cursor = cursorRef.current
+        const outOfBounds = !isCursorInsideTarget(cursor, box)
+
+        drawLabel(`SURVIVED ${activeElapsed.toFixed(2)}s`, 34, '#ffffff', 12)
+        drawLabel(
+          `TARGET SIZE ${Math.round(size)}px`,
+          HEIGHT - 20,
+          '#00eaff',
+          10,
+        )
+
+        const wholeSecond = Math.floor(activeElapsed)
+        if (wholeSecond !== lastHudSecondRef.current) {
+          lastHudSecondRef.current = wholeSecond
+          setElapsed(activeElapsed)
+          setMultiplier(1 + activeElapsed * 0.1)
+          audioRef.current?.runPulse(wholeSecond)
+        }
+
+        if (outOfBounds) {
+          finishRun('LIQUIDATED!', 'The target escaped you. Try again.', activeElapsed)
+        } else {
+          animationId = requestAnimationFrame(frame)
+          return
+        }
+      }
+
+      if (modeRef.current === 'DEAD') {
+        drawTarget(boxRef.current, '#ff3caa')
+        drawCursor()
+      }
+
+      animationId = requestAnimationFrame(frame)
+    }
+
+    animationId = requestAnimationFrame(frame)
+
+    return () => cancelAnimationFrame(animationId)
+  }, [])
+
+  function toggleMute() {
+    if (!audioRef.current?.isReady()) {
+      if (isMuted) {
+        setIsMuted(false)
+        try {
+          window.localStorage.setItem('twitchtrap-muted', 'false')
+        } catch {
+          // Audio remains available for this session.
+        }
+      }
+      void audioRef.current?.unlock()
+      return
+    }
+
+    setIsMuted((previous) => {
+      const next = !previous
+      try {
+        window.localStorage.setItem('twitchtrap-muted', String(next))
+      } catch {
+        // Mute still works for this session if storage is unavailable.
+      }
+      return next
+    })
+  }
+
+  function updateCursor(event) {
+    const canvas = canvasRef.current
+    if (!canvas) return
+
+    const rect = canvas.getBoundingClientRect()
+    cursorRef.current = {
+      x: ((event.clientX - rect.left) / rect.width) * WIDTH,
+      y: ((event.clientY - rect.top) / rect.height) * HEIGHT,
+    }
+  }
+
+  async function startGame() {
+    if (['PREPARING', 'COUNTDOWN', 'ACTIVE'].includes(modeRef.current)) return
+
+    audioRef.current?.unlock()
+    setElapsed(0)
+    setMultiplier(1)
+    setResult(null)
+    setVerificationStatus('local')
+
+    cursorRef.current = { x: -100, y: -100 }
+    boxRef.current = { x: WIDTH / 2 - 55, y: HEIGHT / 2 - 55, size: 110 }
+    startRef.current = performance.now()
+    lastHudSecondRef.current = -1
+    modeRef.current = 'COUNTDOWN'
+    setMode('COUNTDOWN')
+  }
+
+  const running =
+    mode === 'PREPARING' || mode === 'COUNTDOWN' || mode === 'ACTIVE'
+
+  return (
+    <section className="arcade-game" aria-label="TwitchTrap arcade game">
+      <div className="arcade-hud">
+        <div className="arcade-stat">
+          <span>SURVIVAL</span>
+          <strong>{elapsed.toFixed(2)}s</strong>
+        </div>
+        <div className="arcade-stat arcade-stat-center">
+          <span>DEMO MULTIPLIER</span>
+          <strong key={Math.floor(elapsed)} className="arcade-multiplier">{`x${multiplier.toFixed(2)}`}</strong>
+        </div>
+        <div className="arcade-stat arcade-stat-right">
+          <span>PERSONAL BEST</span>
+          <strong>{bestTime.toFixed(2)}s</strong>
+        </div>
+      </div>
+
+      <div className={`arcade-screen ${mode === 'DEAD' ? 'death-impact' : ''}`}>
+        <canvas
+          ref={canvasRef}
+          width={WIDTH}
+          height={HEIGHT}
+          onPointerMove={updateCursor}
+          aria-label="Move your cursor inside the moving target to survive"
+        />
+        <div
+          className={`death-flash ${mode === 'DEAD' ? 'active' : ''}`}
+          aria-hidden="true"
+        />
+
+        {mode === 'DEAD' && (
+          <div className="arcade-result" role="status">
+            <p className="arcade-result-kicker">RUN ENDED</p>
+            <h2>{result?.title}</h2>
+            <p>{result?.subtitle}</p>
+            <div className="arcade-result-stats">
+              <span>SURVIVAL TIME</span>
+              <strong>{(result?.time ?? 0).toFixed(3)}s</strong>
+            </div>
+            <button className="arcade-start-button" onClick={startGame}>
+              TRY AGAIN
+            </button>
+          </div>
+        )}
+      </div>
+
+      <div className="arcade-controls">
+        <div>
+          <strong>STAY IN THE BOX.</strong>
+          <p>The target moves faster and shrinks as time passes.</p>
+        </div>
+        <button
+          className="arcade-start-button"
+          onClick={startGame}
+          disabled={running}
+        >
+          {mode === 'PREPARING'
+            ? 'PREPARING RUN...'
+            : mode === 'COUNTDOWN'
+              ? 'GET READY...'
+              : mode === 'ACTIVE'
+                ? 'RUN IN PROGRESS'
+                : mode === 'DEAD'
+                  ? 'PLAY AGAIN'
+                  : 'START FREE RUN'}
+        </button>
+      </div>
+
+      <div className="arcade-audio-row">
+        <button
+          type="button"
+          className="arcade-mute-button"
+          onClick={toggleMute}
+          aria-pressed={isMuted}
+          aria-label={isMuted ? '\u266A SOUND OFF' : '\u266B SOUND ON'}
+        >
+          {isMuted ? 'SOUND OFF' : 'SOUND ON'}
+        </button>
+        <span className="arcade-audio-caption">
+          PROCEDURAL ARCADE AUDIO
+        </span>
+      </div>
+
+            <p className="arcade-safety-note">
+        LOCAL GAME DEMO | NO WALLET REQUIRED | NO PAYMENTS OR PRIZES | UNVERIFIED LOCAL RUN
+      </p>
+    </section>
+  )
+}
+
+
+======================== FILE: src/game/arcadeRules.js ========================
+export const GAME_WIDTH = 800
+export const GAME_HEIGHT = 420
+export const MAX_RAMP_SECONDS = 30
+
+export function getTargetAtElapsed(elapsedSeconds) {
+  if (!Number.isFinite(elapsedSeconds)) {
+    throw new TypeError('Elapsed time must be a finite number')
+  }
+
+  const elapsed = Math.max(0, elapsedSeconds)
+  const ramp = Math.min(elapsed / MAX_RAMP_SECONDS, 1)
+  const size = Math.max(45, 110 - ramp * 65)
+  const speed = 0.6 + ramp * 2.1
+  const ampX = 70 + ramp * 80
+  const ampY = 40 + ramp * 50
+  const centerX = GAME_WIDTH / 2 - size / 2
+  const centerY = GAME_HEIGHT / 2 - size / 2
+
+  return {
+    x: centerX + Math.sin(elapsed * speed) * ampX,
+    y: centerY + Math.sin(elapsed * speed * 1.3) * ampY,
+    size,
+  }
+}
+
+export function isCursorInsideTarget(cursor, target) {
+  if (
+    !cursor ||
+    !target ||
+    !Number.isFinite(cursor.x) ||
+    !Number.isFinite(cursor.y) ||
+    !Number.isFinite(target.x) ||
+    !Number.isFinite(target.y) ||
+    !Number.isFinite(target.size) ||
+    target.size < 0
+  ) {
+    return false
+  }
+
+  return (
+    cursor.x >= target.x &&
+    cursor.x <= target.x + target.size &&
+    cursor.y >= target.y &&
+    cursor.y <= target.y + target.size
+  )
+}
+
+
+======================== FILE: src/game/arcadeRules.test.js ========================
+import { describe, expect, it } from 'vitest'
+import {
+  GAME_HEIGHT,
+  GAME_WIDTH,
+  getTargetAtElapsed,
+  isCursorInsideTarget,
+} from './arcadeRules.js'
+
+describe('getTargetAtElapsed', () => {
+  it('returns the existing centered target at the start', () => {
+    expect(getTargetAtElapsed(0)).toEqual({
+      x: 345,
+      y: 155,
+      size: 110,
+    })
+  })
+
+  it('shrinks the target during the first 30 seconds', () => {
+    expect(getTargetAtElapsed(15).size).toBe(77.5)
+    expect(getTargetAtElapsed(30).size).toBe(45)
+  })
+
+  it('keeps the minimum target size after the ramp finishes', () => {
+    expect(getTargetAtElapsed(60).size).toBe(45)
+  })
+
+  it('treats negative elapsed time as the starting position', () => {
+    expect(getTargetAtElapsed(-1)).toEqual(getTargetAtElapsed(0))
+  })
+
+  it.each([NaN, Infinity, -Infinity])(
+    'rejects invalid elapsed time: %s',
+    (elapsed) => {
+      expect(() => getTargetAtElapsed(elapsed)).toThrow(
+        'Elapsed time must be a finite number',
+      )
+    },
+  )
+
+  it('returns finite target coordinates at representative times', () => {
+    for (const elapsed of [0, 1, 5, 15, 30, 60, 300]) {
+      const target = getTargetAtElapsed(elapsed)
+
+      expect(Number.isFinite(target.x)).toBe(true)
+      expect(Number.isFinite(target.y)).toBe(true)
+      expect(target.size).toBeGreaterThanOrEqual(45)
+      expect(target.size).toBeLessThanOrEqual(110)
+    }
+  })
+
+  it('uses the expected canvas dimensions', () => {
+    expect(GAME_WIDTH).toBe(800)
+    expect(GAME_HEIGHT).toBe(420)
+  })
+})
+
+describe('isCursorInsideTarget', () => {
+  const target = { x: 100, y: 80, size: 50 }
+
+  it('accepts a cursor inside the target', () => {
+    expect(isCursorInsideTarget({ x: 120, y: 100 }, target)).toBe(true)
+  })
+
+  it('accepts points exactly on the target boundary', () => {
+    expect(isCursorInsideTarget({ x: 100, y: 80 }, target)).toBe(true)
+    expect(isCursorInsideTarget({ x: 150, y: 130 }, target)).toBe(true)
+  })
+
+  it('rejects a cursor outside any edge', () => {
+    expect(isCursorInsideTarget({ x: 99.9, y: 100 }, target)).toBe(false)
+    expect(isCursorInsideTarget({ x: 150.1, y: 100 }, target)).toBe(false)
+    expect(isCursorInsideTarget({ x: 120, y: 79.9 }, target)).toBe(false)
+    expect(isCursorInsideTarget({ x: 120, y: 130.1 }, target)).toBe(false)
+  })
+
+  it('rejects missing or non-finite cursor coordinates', () => {
+    expect(isCursorInsideTarget(null, target)).toBe(false)
+    expect(isCursorInsideTarget({ x: NaN, y: 100 }, target)).toBe(false)
+    expect(isCursorInsideTarget({ x: 100, y: Infinity }, target)).toBe(false)
+  })
+
+  it('rejects invalid targets', () => {
+    expect(isCursorInsideTarget({ x: 120, y: 100 }, null)).toBe(false)
+    expect(
+      isCursorInsideTarget({ x: 120, y: 100 }, {
+        x: 100,
+        y: 80,
+        size: -1,
+      }),
+    ).toBe(false)
+  })
+})
+
+
+
+======================== FILE: src/game/audio.js ========================
+export function createAudioEngine() {
+  let context = null
+  let master = null
+  let muted = false
+  let scene = 'menu'
+  let intensity = 0
+  let step = 0
+  let timer = null
+  let deathTimer = null
+  let lastPulseSecond = -1
+
+  const menuNotes = [659, 0, 523, 784, 0, 587, 392, 0, 523, 0, 880, 784, 0, 587, 494, 0]
+  const gameNotes = [110, 165, 220, 330, 247, 370, 294, 440, 330, 494, 370, 554, 330, 494, 247, 370]
+
+  function ensureContext() {
+    if (typeof window === 'undefined') return null
+
+    const AudioContextClass = window.AudioContext || window.webkitAudioContext
+    if (!AudioContextClass) return null
+
+    if (!context) {
+      context = new AudioContextClass()
+      master = context.createGain()
+      master.gain.value = muted ? 0 : 0.65
+      master.connect(context.destination)
+    }
+
+    return context
+  }
+
+  async function unlock() {
+    const audio = ensureContext()
+    if (!audio) return false
+
+    if (audio.state === 'suspended') {
+      try {
+        await audio.resume()
+      } catch {
+        return false
+      }
+    }
+
+    startLoop()
+    return audio.state === 'running'
+  }
+
+  function tone(frequency, duration, options = {}) {
+    if (muted || !context || !master || context.state !== 'running') return
+
+    const {
+      type = 'sine',
+      endFrequency = frequency,
+      volume = 0.12,
+      delay = 0,
+    } = options
+
+    const start = context.currentTime + delay
+    const oscillator = context.createOscillator()
+    const envelope = context.createGain()
+
+    oscillator.type = type
+    oscillator.frequency.setValueAtTime(Math.max(20, frequency), start)
+    oscillator.frequency.exponentialRampToValueAtTime(
+      Math.max(20, endFrequency),
+      start + duration,
+    )
+
+    envelope.gain.setValueAtTime(0.0001, start)
+    envelope.gain.exponentialRampToValueAtTime(Math.max(0.0002, volume), start + 0.012)
+    envelope.gain.exponentialRampToValueAtTime(0.0001, start + duration)
+
+    oscillator.connect(envelope)
+    envelope.connect(master)
+    oscillator.start(start)
+    oscillator.stop(start + duration + 0.02)
+  }
+
+  function tick() {
+    if (muted || !context || context.state !== 'running') return
+
+    if (scene === 'menu') {
+      const note = menuNotes[step % menuNotes.length]
+
+      if (note > 0) {
+        tone(note, 0.105, {
+          type: 'square',
+          endFrequency: note * 0.985,
+          volume: 0.045,
+        })
+      }
+
+      if (step % 4 === 0) {
+        tone(step % 8 === 0 ? 98 : 123, 0.16, {
+          type: 'triangle',
+          endFrequency: 70,
+          volume: 0.075,
+        })
+      }
+
+      if (step % 8 === 6) {
+        tone(1047, 0.07, {
+          type: 'square',
+          endFrequency: 784,
+          volume: 0.025,
+          delay: 0.035,
+        })
+      }
+
+      step += 1
+      return
+    }
+
+    if (scene === 'gameplay') {
+      const note = gameNotes[step % gameNotes.length]
+      const pitch = 1 + intensity * 0.45
+      const volume = 0.045 + intensity * 0.025
+
+      tone(note * pitch, 0.095, {
+        type: 'square',
+        endFrequency: note * pitch * 1.015,
+        volume,
+      })
+
+      if (step % 4 === 0) {
+        tone(55 + intensity * 22, 0.19, {
+          type: 'sawtooth',
+          endFrequency: 38 + intensity * 10,
+          volume: 0.075 + intensity * 0.025,
+        })
+      }
+
+      if (step % 8 === 4) {
+        tone(660 + intensity * 440, 0.065, {
+          type: 'triangle',
+          endFrequency: 880 + intensity * 550,
+          volume: 0.035 + intensity * 0.025,
+          delay: 0.035,
+        })
+      }
+
+      step += 1
+    }
+  }
+
+  function startLoop() {
+    if (timer !== null || muted || !context || context.state !== 'running') return
+    timer = window.setInterval(tick, 125)
+  }
+
+  function stopLoop() {
+    if (timer !== null) {
+      window.clearInterval(timer)
+      timer = null
+    }
+  }
+
+  function setScene(nextScene) {
+    if (scene === nextScene) return
+    scene = nextScene
+    step = 0
+    stopLoop()
+    startLoop()
+  }
+
+  function setIntensity(nextIntensity) {
+    intensity = Math.max(0, Math.min(1, nextIntensity))
+  }
+
+  function isReady() {
+    return Boolean(context && context.state === 'running')
+  }
+
+  function lockIn() {
+    tone(440, 0.16, { type: 'triangle', endFrequency: 660, volume: 0.14 })
+    tone(880, 0.22, {
+      type: 'sine',
+      endFrequency: 1320,
+      volume: 0.09,
+      delay: 0.11,
+    })
+  }
+
+  function runPulse(second) {
+    if (second <= 0 || second % 3 !== 0 || second === lastPulseSecond) return
+
+    lastPulseSecond = second
+    const urgency = Math.min(second / 30, 1)
+
+    tone(180 + urgency * 100, 0.12, {
+      type: 'triangle',
+      endFrequency: 100 + urgency * 40,
+      volume: 0.035 + urgency * 0.025,
+    })
+  }
+
+  function death() {
+    if (deathTimer !== null) {
+      window.clearTimeout(deathTimer)
+      deathTimer = null
+    }
+
+    setScene('death')
+
+    // A short, exaggerated arcade elimination sting.
+    tone(115, 0.48, { type: 'sawtooth', endFrequency: 32, volume: 0.24 })
+    tone(68, 0.38, { type: 'square', endFrequency: 35, volume: 0.12, delay: 0.025 })
+    tone(920, 0.07, { type: 'square', endFrequency: 170, volume: 0.055, delay: 0.04 })
+    tone(440, 0.09, { type: 'sawtooth', endFrequency: 90, volume: 0.045, delay: 0.13 })
+
+    // Return to the menu soundtrack after the sting finishes.
+    deathTimer = window.setTimeout(() => {
+      deathTimer = null
+      setScene('menu')
+    }, 680)
+  }
+
+  function setMuted(nextMuted) {
+    muted = Boolean(nextMuted)
+
+    if (master && context) {
+      master.gain.setTargetAtTime(
+        muted ? 0 : 0.65,
+        context.currentTime,
+        0.025,
+      )
+    }
+
+    if (muted) stopLoop()
+    else startLoop()
+  }
+
+  function dispose() {
+    stopLoop()
+    if (deathTimer !== null) {
+      window.clearTimeout(deathTimer)
+      deathTimer = null
+    }
+
+    if (context && context.state !== 'closed') {
+      context.close().catch(() => {})
+    }
+
+    context = null
+    master = null
+  }
+
+  return {
+    unlock,
+    lockIn,
+    runPulse,
+    death,
+    setMuted,
+    setScene,
+    setIntensity,
+    isReady,
+    dispose,
+  }
+}
+
+
+======================== FILE: src/styles/global.css ========================
+@import url('https://fonts.googleapis.com/css2?family=Silkscreen:wght@400;700&family=Inter:wght@400;500;600;700;800;900&display=swap');
+
+:root {
+  font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+  color: #f8efff;
+  background: #090610;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  --bg: #090610;
+  --cabinet: #241039;
+  --cabinet-dark: #160b25;
+  --pink: #ff38b8;
+  --pink-hot: #ff168d;
+  --purple: #ad78ff;
+  --cyan: #00eaff;
+  --gold: #ffd166;
+  --muted: #a99ab9;
+  --line: rgba(206, 149, 255, .24);
+}
+
+* { box-sizing: border-box; }
+
+html {
+  min-width: 320px;
+  min-height: 100%;
+  background: var(--bg);
+  scrollbar-color: #63328c #100a19;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  pointer-events: none;
+  opacity: .13;
+  background: repeating-linear-gradient(
+    to bottom,
+    transparent 0,
+    transparent 3px,
+    rgba(255,255,255,.1) 4px
+  );
+}
+
+button, a { font: inherit; }
+button { -webkit-tap-highlight-color: transparent; }
+a { color: inherit; text-decoration: none; }
+button:focus-visible, a:focus-visible {
+  outline: 2px solid var(--cyan);
+  outline-offset: 4px;
+}
+
+.app-shell {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  isolation: isolate;
+  overflow: clip;
+  background:
+    radial-gradient(ellipse at 50% 37%, rgba(111, 33, 157, .23), transparent 52%),
+    radial-gradient(ellipse at 6% 85%, rgba(255, 56, 184, .08), transparent 30%),
+    #090610;
+}
+
+.app-shell::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  opacity: .19;
+  background-image:
+    linear-gradient(rgba(173,120,255,.13) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(173,120,255,.13) 1px, transparent 1px);
+  background-size: 38px 38px;
+  mask-image: linear-gradient(to bottom, transparent, #000 14%, #000 78%, transparent);
+}
+
+.topbar {
+  position: relative;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  width: min(1120px, calc(100% - 40px));
+  margin: 0 auto;
+  padding: 17px 0;
+  border-bottom: 1px solid rgba(206,149,255,.16);
+}
+
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.brand-mark {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border: 1px solid var(--pink);
+  background: linear-gradient(145deg, #441b65, #180b2b);
+  box-shadow: 0 0 15px rgba(255,56,184,.18), inset 0 0 10px rgba(255,56,184,.13);
+  color: var(--pink);
+  font-family: Silkscreen, monospace;
+  font-size: 14px;
+}
+
+.brand-name {
+  font-family: Silkscreen, monospace;
+  font-size: 13px;
+  letter-spacing: -.07em;
+  text-shadow: 0 0 12px rgba(255,56,184,.18);
+}
+
+.brand-name > span { color: var(--pink); }
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 15px;
+}
+
+.network-status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #b5a7c4;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: .12em;
+}
+
+.status-dot, .wallet-indicator {
+  flex: 0 0 auto;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #6dffb1;
+  box-shadow: 0 0 10px rgba(109,255,177,.7);
+}
+
+.wallet-menu { position: relative; }
+
+.wallet-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 34px;
+  padding: 0 12px;
+  border: 1px solid rgba(255,56,184,.45);
+  background: rgba(255,56,184,.07);
+  color: #ffc3e8;
+  cursor: pointer;
+  font-size: 9px;
+  font-weight: 900;
+  letter-spacing: .055em;
+}
+
+.wallet-button:disabled { cursor: not-allowed; opacity: .45; }
+.wallet-connected { border-color: rgba(0,234,255,.45); color: var(--cyan); }
+
+.wallet-options {
+  position: absolute;
+  top: calc(100% + 7px);
+  right: 0;
+  z-index: 30;
+  display: grid;
+  min-width: 150px;
+  padding: 5px;
+  border: 1px solid var(--line);
+  background: #180e26;
+  box-shadow: 0 10px 30px #0008;
+}
+
+.wallet-option {
+  padding: 11px;
+  border: 0;
+  background: transparent;
+  color: #fff;
+  cursor: pointer;
+  text-align: left;
+}
+
+.wallet-option:hover { background: rgba(173,120,255,.15); }
+
+.hero {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  margin: 0 auto;
+  padding: clamp(16px, 3vh, 32px) 18px 26px;
+}
+
+.intro-line { width: min(880px, 100%); text-align: center; }
+
+.eyebrow {
+  margin: 0 0 10px;
+  color: var(--cyan);
+  font-size: 9px;
+  font-weight: 900;
+  letter-spacing: .22em;
+}
+
+.eyebrow-star { color: var(--pink); }
+
+.intro-line h1 {
+  margin: 0;
+  font-family: Silkscreen, monospace;
+  font-size: clamp(17px, 2.8vw, 29px);
+  font-weight: 700;
+  line-height: 1.45;
+  letter-spacing: -.055em;
+  text-shadow: 0 0 22px rgba(173,120,255,.15);
+}
+
+.intro-line h1 span {
+  color: var(--pink);
+  text-shadow: 0 0 22px rgba(255,56,184,.22);
+}
+
+.intro-line > p {
+  margin: 7px 0 17px;
+  color: #b8a9c6;
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.cabinet {
+  position: relative;
+  width: min(900px, 100%);
+  padding: 12px;
+  border: 2px solid #63328b;
+  border-radius: 7px;
+  background:
+    linear-gradient(125deg, rgba(255,255,255,.055), transparent 18%),
+    linear-gradient(145deg, #32144a, #1d0d30 48%, #2a1040);
+  box-shadow:
+    0 0 0 1px #0d0715,
+    0 0 0 4px rgba(111,45,154,.18),
+    0 18px 55px rgba(0,0,0,.48),
+    0 0 42px rgba(156,57,222,.12),
+    inset 0 0 0 1px rgba(255,255,255,.045);
+}
+
+.cabinet-rivet {
+  position: absolute;
+  z-index: 5;
+  width: 7px;
+  height: 7px;
+  border: 1px solid #a77ac0;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #fff0ff, #77518c 55%, #291038);
+  box-shadow: 0 0 3px #000;
+}
+.rivet-tl { top: 5px; left: 5px; }
+.rivet-tr { top: 5px; right: 5px; }
+.rivet-bl { bottom: 5px; left: 5px; }
+.rivet-br { bottom: 5px; right: 5px; }
+
+.cabinet-marquee {
+  display: grid;
+  grid-template-columns: 58px minmax(0,1fr) 58px;
+  align-items: center;
+  gap: 8px;
+  min-height: 84px;
+  padding: 10px 13px;
+  border: 1px solid #85439d;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.05), transparent 45%),
+    #180b28;
+  box-shadow: inset 0 0 18px rgba(0,0,0,.45);
+}
+
+.marquee-center { min-width: 0; text-align: center; }
+
+.marquee-title {
+  color: #ff7bd1;
+  font-family: Silkscreen, monospace;
+  font-size: clamp(21px, 4.2vw, 43px);
+  line-height: 1.35;
+  letter-spacing: -.08em;
+  text-shadow:
+    0 0 2px #fff,
+    0 0 8px #ff38b8,
+    0 0 20px rgba(255,22,141,.8);
+}
+
+.marquee-sub {
+  margin-top: 4px;
+  color: var(--gold);
+  font-size: 8px;
+  font-weight: 900;
+  letter-spacing: .16em;
+}
+
+.marquee-side {
+  color: #9c81b3;
+  font-family: Silkscreen, monospace;
+  font-size: 8px;
+  line-height: 1.8;
+  text-align: center;
+}
+
+.marquee-ready { color: #8affbe; }
+.marquee-ready span {
+  display: block;
+  width: 6px;
+  height: 6px;
+  margin: 0 auto 5px;
+  border-radius: 50%;
+  background: #6dffb1;
+  box-shadow: 0 0 9px #6dffb1;
+}
+
+.cabinet-bezel {
+  margin-top: 10px;
+  padding: 9px;
+  border: 1px solid #583273;
+  background: linear-gradient(145deg, #100919, #1b0c29);
+  box-shadow: inset 0 0 18px #0008;
+}
+
+.bezel-topline {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 0 1px 9px;
+  color: #8d7b9f;
+  font-family: Silkscreen, monospace;
+  font-size: 7px;
+  letter-spacing: .045em;
+}
+
+.bezel-live { color: #8affbe; white-space: nowrap; }
+.bezel-live i {
+  display: inline-block;
+  width: 5px;
+  height: 5px;
+  margin-right: 5px;
+  border-radius: 50%;
+  background: #6dffb1;
+  box-shadow: 0 0 6px #6dffb1;
+}
+
+.cabinet-system-log {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 9px;
+  min-height: 29px;
+  margin-top: 9px;
+  padding: 7px 9px;
+  border: 1px solid rgba(0,234,255,.13);
+  background: #090812;
+  color: #8d829b;
+  font-family: ui-monospace, monospace;
+  font-size: 9px;
+  letter-spacing: .035em;
+}
+
+.log-prompt { color: var(--cyan); font-weight: 900; }
+.log-divider { color: #5d456d; }
+.log-end { margin-left: auto; color: #c59ae8; }
+
+.cabinet-deck {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 15px;
+  min-height: 72px;
+  margin-top: 10px;
+  padding: 10px 15px;
+  border: 1px solid #583273;
+  background: linear-gradient(180deg, #28113c, #190b28);
+}
+
+.deck-brand { display: flex; align-items: center; gap: 9px; }
+.deck-brand-symbol {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border: 1px solid #8250a1;
+  background: #160b22;
+  color: var(--pink);
+  font-family: Silkscreen, monospace;
+  font-size: 12px;
+  box-shadow: inset 0 0 10px #0008;
+}
+.deck-brand > span:last-child {
+  color: #9b85ac;
+  font-size: 8px;
+  line-height: 1.6;
+  letter-spacing: .12em;
+}
+.deck-brand strong { color: #f4dfff; }
+
+.deck-buttons { display: flex; align-items: center; gap: 9px; }
+.deck-button {
+  display: block;
+  width: 27px;
+  height: 27px;
+  border: 2px solid rgba(255,255,255,.22);
+  border-radius: 50%;
+  box-shadow: inset 0 -4px 0 rgba(0,0,0,.4), 0 3px 0 #090510, 0 0 10px currentColor;
+}
+.deck-button.pink { background: #ff38b8; color: #ff38b8; }
+.deck-button.cyan { background: #00d9ed; color: #00d9ed; }
+.deck-button.gold { background: #ffd166; color: #ffd166; }
+.deck-button.purple { background: #a56bff; color: #a56bff; }
+
+.deck-status { display: flex; gap: 11px; }
+.deck-status span {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  color: #9f8cad;
+  font-family: Silkscreen, monospace;
+  font-size: 7px;
+}
+.deck-status i, .under-cabinet i {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+}
+.led-pink { background: var(--pink); box-shadow: 0 0 7px var(--pink); }
+.led-cyan { background: var(--cyan); box-shadow: 0 0 7px var(--cyan); }
+.led-gold { background: var(--gold); box-shadow: 0 0 7px var(--gold); }
+
+.cabinet-bottom {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 12px 5px 2px;
+  color: #816995;
+  font-family: Silkscreen, monospace;
+  font-size: 6px;
+  letter-spacing: .06em;
+}
+
+.under-cabinet {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 10px 23px;
+  margin-top: 14px;
+  color: #a99ab9;
+  font-size: 8px;
+  font-weight: 800;
+  letter-spacing: .075em;
+}
+.under-cabinet span { display: inline-flex; align-items: center; gap: 7px; }
+.under-cabinet span:nth-child(1) i { background: #8affbe; }
+.under-cabinet span:nth-child(2) i { background: var(--pink); }
+.under-cabinet span:nth-child(3) i { background: var(--cyan); }
+
+.wallet-error {
+  max-width: 700px;
+  margin: 15px auto 0;
+  color: #ff9eab;
+  font-size: 12px;
+  overflow-wrap: anywhere;
+}
+
+.wallet-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  width: min(100%, 460px);
+  margin-top: 20px;
+  padding: 18px;
+  border: 1px solid var(--line);
+  background: rgba(17,11,27,.94);
+}
+.wallet-card-label, .wallet-card-note {
+  color: var(--muted);
+  font-size: 10px;
+  text-align: center;
+}
+.wallet-card strong { color: var(--cyan); }
+.wallet-card code { max-width: 100%; color: #d6c6ff; overflow-wrap: anywhere; }
+.wallet-card-note { line-height: 1.6; }
+
+.footer {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  width: min(1120px, calc(100% - 40px));
+  margin: auto auto 0;
+  padding: 15px 0;
+  border-top: 1px solid rgba(206,149,255,.13);
+  color: #71627f;
+  font-family: Silkscreen, monospace;
+  font-size: 7px;
+  letter-spacing: .04em;
+}
+.footer b { color: var(--pink); }
+
+@media (min-width: 1000px) and (min-height: 850px) {
+  .hero { padding-top: 26px; padding-bottom: 24px; }
+  .intro-line > p { margin-bottom: 20px; }
+  .cabinet { padding: 14px; }
+}
+
+@media (max-width: 650px) {
+  .topbar { width: calc(100% - 28px); padding: 12px 0; }
+  .brand { gap: 7px; }
+  .brand-mark { width: 28px; height: 28px; font-size: 11px; }
+  .brand-name { font-size: 10px; }
+  .header-actions { gap: 8px; }
+  .network-status { gap: 5px; font-size: 7px; letter-spacing: .035em; }
+  .wallet-button { min-height: 30px; padding: 0 8px; font-size: 7px; }
+  .hero { padding: 17px 10px 22px; }
+  .intro-line h1 { font-size: clamp(14px, 4.3vw, 22px); }
+  .intro-line > p { max-width: 350px; margin: 6px auto 13px; font-size: 11px; }
+  .cabinet { padding: 7px; border-width: 1px; }
+  .cabinet-marquee { grid-template-columns: 36px minmax(0,1fr) 36px; gap: 4px; min-height: 65px; padding: 7px 5px; }
+  .marquee-title { font-size: clamp(17px, 6vw, 29px); }
+  .marquee-sub { font-size: 6px; letter-spacing: .07em; }
+  .marquee-side { font-size: 6px; }
+  .cabinet-bezel { margin-top: 7px; padding: 6px; }
+  .bezel-topline { font-size: 6px; padding-bottom: 6px; }
+  .cabinet-deck { min-height: 57px; padding: 8px; gap: 8px; }
+  .deck-brand-symbol { width: 29px; height: 29px; font-size: 10px; }
+  .deck-brand > span:last-child { font-size: 6px; }
+  .deck-buttons { gap: 6px; }
+  .deck-button { width: 20px; height: 20px; }
+  .deck-status { gap: 7px; }
+  .deck-status span { font-size: 6px; gap: 4px; }
+  .cabinet-bottom { font-size: 5px; flex-wrap: wrap; }
+  .under-cabinet { gap: 8px 12px; font-size: 7px; }
+  .footer { width: calc(100% - 28px); font-size: 6px; }
+}
+
+@media (max-width: 390px) {
+  .network-status { max-width: 95px; line-height: 1.5; }
+  .cabinet { padding: 5px; }
+  .cabinet-marquee { grid-template-columns: 29px minmax(0,1fr) 29px; }
+  .marquee-title { font-size: 16px; }
+  .marquee-side { font-size: 5px; }
+  .marquee-sub { font-size: 5px; }
+  .deck-brand { gap: 5px; }
+  .deck-brand-symbol { width: 25px; height: 25px; }
+  .deck-buttons { gap: 5px; }
+  .deck-button { width: 17px; height: 17px; }
+  .deck-status { flex-direction: column; gap: 4px; }
+  .cabinet-system-log { gap: 6px; font-size: 8px; }
+  .footer { flex-wrap: wrap; justify-content: center; }
+}
+
+@media (max-height: 760px) and (min-width: 651px) {
+  .hero { padding-top: 10px; padding-bottom: 12px; }
+  .intro-line h1 { font-size: clamp(17px, 2vw, 23px); }
+  .intro-line > p { margin: 4px 0 10px; }
+  .cabinet { padding: 8px; }
+  .cabinet-marquee { min-height: 62px; }
+  .marquee-title { font-size: clamp(20px, 3vw, 30px); }
+  .cabinet-deck { min-height: 54px; }
+  .footer { padding: 10px 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    scroll-behavior: auto !important;
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+  }
+}
+
+======================== FILE: supabase/config.toml ========================
+# For detailed configuration reference documentation, visit:
+# https://supabase.com/docs/guides/local-development/cli/config
+# A string used to distinguish different Supabase projects on the same host. Defaults to the
+# working directory name when running `supabase init`.
+project_id = "twitchtrap-game"
+
+[api]
+enabled = true
+# Port to use for the API URL.
+port = 54321
+# Schemas to expose in your API. Tables, views and stored procedures in this schema will get API
+# endpoints. `public` and `graphql_public` schemas are included by default.
+schemas = ["public", "graphql_public"]
+# Extra schemas to add to the search_path of every request.
+extra_search_path = ["public", "extensions"]
+# The maximum number of rows returns from a view, table, or stored procedure. Limits payload size
+# for accidental or malicious requests.
+max_rows = 1000
+# Controls whether new tables, views, sequences and functions created in the `public` schema by
+# `postgres` are reachable through the Data API roles (`anon`, `authenticated`, `service_role`)
+# without explicit GRANTs, matching the cloud default. Set to `false` to require explicit GRANTs
+# instead. Left unset, a fresh project falls back to `true`.
+# auto_expose_new_tables = true
+
+[api.tls]
+# Enable HTTPS endpoints locally using a self-signed certificate.
+enabled = false
+# Paths to self-signed certificate pair.
+# cert_path = "../certs/my-cert.pem"
+# key_path = "../certs/my-key.pem"
+
+[db]
+# Port to use for the local database URL.
+port = 54322
+# Port used by db diff command to initialize the shadow database.
+shadow_port = 54320
+# Maximum amount of time to wait for health check when starting the local database.
+health_timeout = "2m"
+# The database major version to use. This has to be the same as your remote database's. Run `SHOW
+# server_version;` on the remote database to check.
+major_version = 17
+# OrioleDB version to use as the Postgres storage engine. Leave empty to use the default engine.
+orioledb_version = ""
+
+[db.pooler]
+enabled = false
+# Port to use for the local connection pooler.
+port = 54329
+# Specifies when a server connection can be reused by other clients.
+# Configure one of the supported pooler modes: `transaction`, `session`.
+pool_mode = "transaction"
+# How many server connections to allow per user/database pair.
+default_pool_size = 20
+# Maximum number of client connections allowed.
+max_client_conn = 100
+
+# [db.vault]
+# secret_key = "env(SECRET_VALUE)"
+
+[db.migrations]
+# If disabled, migrations will be skipped during a db push or reset.
+enabled = true
+# Specifies an ordered list of schema files, directories, or glob patterns that describe your database.
+# Supports paths relative to supabase directory: "./schemas/*.sql", "./database".
+schema_paths = []
+
+[db.seed]
+# If enabled, seeds the database after migrations during a db reset.
+enabled = true
+# Specifies an ordered list of seed files to load during db reset.
+# Supports glob patterns relative to supabase directory: "./seeds/*.sql"
+sql_paths = ["./seed.sql"]
+
+[db.network_restrictions]
+# Enable management of network restrictions.
+enabled = false
+# List of IPv4 CIDR blocks allowed to connect to the database.
+# Defaults to allow all IPv4 connections. Set empty array to block all IPs.
+allowed_cidrs = ["0.0.0.0/0"]
+# List of IPv6 CIDR blocks allowed to connect to the database.
+# Defaults to allow all IPv6 connections. Set empty array to block all IPs.
+allowed_cidrs_v6 = ["::/0"]
+
+# Uncomment to reject non-secure connections to the database.
+# [db.ssl_enforcement]
+# enabled = true
+
+[realtime]
+enabled = true
+# Bind realtime via either IPv4 or IPv6. (default: IPv4)
+# ip_version = "IPv6"
+# The maximum length in bytes of HTTP request headers. (default: 4096)
+# max_header_length = 4096
+
+[studio]
+enabled = true
+# Port to use for Supabase Studio.
+port = 54323
+# External URL of the API server that frontend connects to.
+api_url = "http://127.0.0.1"
+# OpenAI API Key to use for Supabase AI in the Supabase Studio.
+openai_api_key = "env(OPENAI_API_KEY)"
+
+# Email testing server. Emails sent with the local dev setup are not actually sent - rather, they
+# are monitored, and you can view the emails that would have been sent from the web interface.
+[local_smtp]
+enabled = true
+# Port to use for the email testing server web interface.
+port = 54324
+# Uncomment to expose additional ports for testing user applications that send emails.
+# smtp_port = 54325
+# pop3_port = 54326
+# admin_email = "admin@email.com"
+# sender_name = "Admin"
+
+[storage]
+enabled = true
+# The maximum file size allowed (e.g. "5MB", "500KB").
+file_size_limit = "50MiB"
+
+# Uncomment to configure local storage buckets
+# [storage.buckets.images]
+# public = false
+# file_size_limit = "50MiB"
+# allowed_mime_types = ["image/png", "image/jpeg"]
+# objects_path = "./images"
+
+# Allow connections via S3 compatible clients
+[storage.s3_protocol]
+enabled = true
+
+# Image transformation API is available to Supabase Pro plan.
+# [storage.image_transformation]
+# enabled = true
+
+# Store analytical data in S3 for running ETL jobs over Iceberg Catalog
+# This feature is only available on the hosted platform.
+[storage.analytics]
+enabled = false
+max_namespaces = 5
+max_tables = 10
+max_catalogs = 2
+
+# Analytics Buckets is available to Supabase Pro plan.
+# [storage.analytics.buckets.my-warehouse]
+
+# Store vector embeddings in S3 for large and durable datasets
+[storage.vector]
+enabled = true
+max_buckets = 10
+max_indexes = 5
+
+# Vector Buckets is available to Supabase Pro plan.
+# [storage.vector.buckets.documents-openai]
+
+[auth]
+enabled = true
+# The base URL of your website. Used as an allow-list for redirects and for constructing URLs used
+# in emails.
+site_url = "http://127.0.0.1:3000"
+# The public URL that Auth serves on. Defaults to the API external URL with `/auth/v1` appended.
+# external_url = ""
+# A list of *exact* URLs that auth providers are permitted to redirect to post authentication.
+additional_redirect_urls = ["https://127.0.0.1:3000"]
+# How long tokens are valid for, in seconds. Defaults to 3600 (1 hour), maximum 604,800 (1 week).
+jwt_expiry = 3600
+# JWT issuer URL. If not set, defaults to auth.external_url.
+# jwt_issuer = ""
+# Path to JWT signing key. DO NOT commit your signing keys file to git.
+# signing_keys_path = "./signing_keys.json"
+# If disabled, the refresh token will never expire.
+enable_refresh_token_rotation = true
+# Allows refresh tokens to be reused after expiry, up to the specified interval in seconds.
+# Requires enable_refresh_token_rotation = true.
+refresh_token_reuse_interval = 10
+# Allow/disallow new user signups to your project.
+enable_signup = true
+# Allow/disallow anonymous sign-ins to your project.
+enable_anonymous_sign_ins = false
+# Allow/disallow testing manual linking of accounts
+enable_manual_linking = false
+# Passwords shorter than this value will be rejected as weak. Minimum 6, recommended 8 or more.
+minimum_password_length = 6
+# Passwords that do not meet the following requirements will be rejected as weak. Supported values
+# are: `letters_digits`, `lower_upper_letters_digits`, `lower_upper_letters_digits_symbols`
+password_requirements = ""
+
+# Configure passkey sign-ins.
+# [auth.passkey]
+# enabled = false
+
+# Configure WebAuthn relying party settings (required when passkey is enabled).
+# [auth.webauthn]
+# rp_display_name = "Supabase"
+# rp_id = "localhost"
+# rp_origins = ["http://127.0.0.1:3000"]
+
+[auth.rate_limit]
+# Number of emails that can be sent per hour. Requires auth.email.smtp to be enabled.
+email_sent = 2
+# Number of SMS messages that can be sent per hour. Requires auth.sms to be enabled.
+sms_sent = 30
+# Number of anonymous sign-ins that can be made per hour per IP address. Requires enable_anonymous_sign_ins = true.
+anonymous_users = 30
+# Number of sessions that can be refreshed in a 5 minute interval per IP address.
+token_refresh = 150
+# Number of sign up and sign-in requests that can be made in a 5 minute interval per IP address (excludes anonymous users).
+sign_in_sign_ups = 30
+# Number of OTP / Magic link verifications that can be made in a 5 minute interval per IP address.
+token_verifications = 30
+# Number of Web3 logins that can be made in a 5 minute interval per IP address.
+web3 = 30
+
+# Configure one of the supported captcha providers: `hcaptcha`, `turnstile`.
+# [auth.captcha]
+# enabled = true
+# provider = "hcaptcha"
+# secret = ""
+
+[auth.email]
+# Allow/disallow new user signups via email to your project.
+enable_signup = true
+# If enabled, a user will be required to confirm any email change on both the old, and new email
+# addresses. If disabled, only the new email is required to confirm.
+double_confirm_changes = true
+# If enabled, users need to confirm their email address before signing in.
+enable_confirmations = false
+# If enabled, users will need to reauthenticate or have logged in recently to change their password.
+secure_password_change = false
+# Controls the minimum amount of time that must pass before sending another signup confirmation or password reset email.
+max_frequency = "1s"
+# Number of characters used in the email OTP.
+otp_length = 6
+# Number of seconds before the email OTP expires (defaults to 1 hour).
+otp_expiry = 3600
+
+# Use a production-ready SMTP server
+# [auth.email.smtp]
+# enabled = true
+# host = "smtp.sendgrid.net"
+# port = 587
+# user = "apikey"
+# pass = "env(SENDGRID_API_KEY)"
+# admin_email = "admin@email.com"
+# sender_name = "Admin"
+
+# Uncomment to customize email template
+# [auth.email.template.invite]
+# subject = "You have been invited"
+# content_path = "./supabase/templates/invite.html"
+
+# Uncomment to customize notification email template
+# [auth.email.notification.password_changed]
+# enabled = true
+# subject = "Your password has been changed"
+# content_path = "./supabase/templates/password_changed_notification.html"
+
+[auth.sms]
+# Allow/disallow new user signups via SMS to your project.
+enable_signup = false
+# If enabled, users need to confirm their phone number before signing in.
+enable_confirmations = false
+# Template for sending OTP to users
+template = "Your code is {{ .Code }}"
+# Controls the minimum amount of time that must pass before sending another sms otp.
+max_frequency = "5s"
+
+# Use pre-defined map of phone number to OTP for testing.
+# [auth.sms.test_otp]
+# 4152127777 = "123456"
+
+# Configure logged in session timeouts.
+# [auth.sessions]
+# Force log out after the specified duration.
+# timebox = "24h"
+# Force log out if the user has been inactive longer than the specified duration.
+# inactivity_timeout = "8h"
+
+# This hook runs before a new user is created and allows developers to reject the request based on the incoming user object.
+# [auth.hook.before_user_created]
+# enabled = true
+# uri = "pg-functions://postgres/auth/before-user-created-hook"
+
+# This hook runs before a token is issued and allows you to add additional claims based on the authentication method used.
+# [auth.hook.custom_access_token]
+# enabled = true
+# uri = "pg-functions://<database>/<schema>/<hook_name>"
+
+# Configure one of the supported SMS providers: `twilio`, `twilio_verify`, `messagebird`, `textlocal`, `vonage`.
+[auth.sms.twilio]
+enabled = false
+account_sid = ""
+message_service_sid = ""
+# DO NOT commit your Twilio auth token to git. Use environment variable substitution instead:
+auth_token = "env(SUPABASE_AUTH_SMS_TWILIO_AUTH_TOKEN)"
+
+# Multi-factor-authentication is available to Supabase Pro plan.
+[auth.mfa]
+# Control how many MFA factors can be enrolled at once per user.
+max_enrolled_factors = 10
+
+# Control MFA via App Authenticator (TOTP)
+[auth.mfa.totp]
+enroll_enabled = false
+verify_enabled = false
+
+# Configure MFA via Phone Messaging
+[auth.mfa.phone]
+enroll_enabled = false
+verify_enabled = false
+otp_length = 6
+template = "Your code is {{ .Code }}"
+max_frequency = "5s"
+
+# Configure MFA via WebAuthn
+# [auth.mfa.web_authn]
+# enroll_enabled = true
+# verify_enabled = true
+
+# Use an external OAuth provider. The full list of providers are: `apple`, `azure`, `bitbucket`,
+# `discord`, `facebook`, `github`, `gitlab`, `google`, `keycloak`, `linkedin_oidc`, `notion`, `twitch`,
+# `twitter`, `x`, `slack`, `spotify`, `workos`, `zoom`.
+[auth.external.apple]
+enabled = false
+client_id = ""
+# DO NOT commit your OAuth provider secret to git. Use environment variable substitution instead:
+secret = "env(SUPABASE_AUTH_EXTERNAL_APPLE_SECRET)"
+# Overrides the default auth callback URL derived from auth.external_url.
+redirect_uri = ""
+# Overrides the default auth provider URL. Used to support self-hosted gitlab, single-tenant Azure,
+# or any other third-party OIDC providers.
+url = ""
+# If enabled, the nonce check will be skipped. Required for local sign in with Google auth.
+skip_nonce_check = false
+# If enabled, it will allow the user to successfully authenticate when the provider does not return an email address.
+email_optional = false
+
+# Allow Solana wallet holders to sign in to your project via the Sign in with Solana (SIWS, EIP-4361) standard.
+# You can configure "web3" rate limit in the [auth.rate_limit] section and set up [auth.captcha] if self-hosting.
+[auth.web3.solana]
+enabled = false
+
+# Use Firebase Auth as a third-party provider alongside Supabase Auth.
+[auth.third_party.firebase]
+enabled = false
+# project_id = "my-firebase-project"
+
+# Use Auth0 as a third-party provider alongside Supabase Auth.
+[auth.third_party.auth0]
+enabled = false
+# tenant = "my-auth0-tenant"
+# tenant_region = "us"
+
+# Use AWS Cognito (Amplify) as a third-party provider alongside Supabase Auth.
+[auth.third_party.aws_cognito]
+enabled = false
+# user_pool_id = "my-user-pool-id"
+# user_pool_region = "us-east-1"
+
+# Use Clerk as a third-party provider alongside Supabase Auth.
+[auth.third_party.clerk]
+enabled = false
+# Obtain from https://clerk.com/setup/supabase
+# domain = "example.clerk.accounts.dev"
+
+# OAuth server configuration
+[auth.oauth_server]
+# Enable OAuth server functionality
+enabled = false
+# Path for OAuth consent flow UI
+authorization_url_path = "/oauth/consent"
+# Allow dynamic client registration
+allow_dynamic_registration = false
+
+[edge_runtime]
+enabled = true
+# Supported request policies: `oneshot`, `per_worker`.
+# `per_worker` (default) — enables hot reload during local development.
+# `oneshot` — fallback mode if hot reload causes issues (e.g. in large repos or with symlinks).
+policy = "per_worker"
+# Port to attach the Chrome inspector for debugging edge functions.
+inspector_port = 8083
+# The Deno major version to use.
+deno_version = 2
+
+# [edge_runtime.secrets]
+# secret_key = "env(SECRET_VALUE)"
+
+[analytics]
+enabled = true
+port = 54327
+# Configure one of the supported backends: `postgres`, `bigquery`.
+backend = "postgres"
+
+# Experimental features may be deprecated any time
+[experimental]
+# Configures S3 bucket URL, eg. <bucket_name>.s3-<region>.amazonaws.com
+s3_host = "env(S3_HOST)"
+# Configures S3 bucket region, eg. us-east-1
+s3_region = "env(S3_REGION)"
+# Configures AWS_ACCESS_KEY_ID for S3 bucket
+s3_access_key = "env(S3_ACCESS_KEY)"
+# Configures AWS_SECRET_ACCESS_KEY for S3 bucket
+s3_secret_key = "env(S3_SECRET_KEY)"
+
+# pg-delta is the schema diff engine for db diff / db pull / db remote commit.
+# Set enabled = false to fall back to the legacy migra engine.
+[experimental.pgdelta]
+enabled = true
+# Directory under `supabase/` where declarative files are written.
+# declarative_schema_path = "./schemas"
+# JSON string passed through to pg-delta SQL formatting. When omitted, SQL is
+# formatted with uppercase keywords, indent 2, max width 180, trailing commas,
+# and column/key alignment. Set to "null" to emit raw, unformatted SQL.
+# format_options = "{\"keywordCase\":\"upper\",\"indent\":2,\"maxWidth\":180,\"commaStyle\":\"trailing\"}"
+
+# Local draft: public game endpoints; server-side input validation is required.
+[functions.arcade-challenge-issue]
+verify_jwt = false
+
+[functions.arcade-challenge-activate]
+verify_jwt = false
+
+
+======================== FILE: supabase\.gitignore ========================
+# Supabase
+.branches
+.temp
+
+# dotenvx
+.env.keys
+.env.local
+.env.*.local
+
+
+======================== FILE: supabase\.temp\cli-latest ========================
+v2.120.0
+
+======================== FILE: supabase\.temp\gotrue-version ========================
+v2.197.0
+
+======================== FILE: supabase\.temp\linked-project.json ========================
+{"ref":"jbjisomsmvixassrcchd","name":"Typikk-lab's Project","organization_id":"osqgisgoafkrpzpupfpq","organization_slug":"osqgisgoafkrpzpupfpq"}
+
+======================== FILE: supabase\.temp\pooler-url ========================
+postgresql://postgres.jbjisomsmvixassrcchd@aws-0-eu-central-1.pooler.supabase.com:5432/postgres
+
+======================== FILE: supabase\.temp\postgres-version ========================
+17.6.1.166
+
+======================== FILE: supabase\.temp\project-ref ========================
+jbjisomsmvixassrcchd
+
+======================== FILE: supabase\.temp\rest-version ========================
+v14.5
+
+======================== FILE: supabase\.temp\storage-migration ========================
+drop-bucketid-objname-index
+
+======================== FILE: supabase\.temp\storage-version ========================
+v1.80.2
+
+======================== FILE: supabase\config.toml ========================
+# For detailed configuration reference documentation, visit:
+# https://supabase.com/docs/guides/local-development/cli/config
+# A string used to distinguish different Supabase projects on the same host. Defaults to the
+# working directory name when running `supabase init`.
+project_id = "twitchtrap-game"
+
+[api]
+enabled = true
+# Port to use for the API URL.
+port = 54321
+# Schemas to expose in your API. Tables, views and stored procedures in this schema will get API
+# endpoints. `public` and `graphql_public` schemas are included by default.
+schemas = ["public", "graphql_public"]
+# Extra schemas to add to the search_path of every request.
+extra_search_path = ["public", "extensions"]
+# The maximum number of rows returns from a view, table, or stored procedure. Limits payload size
+# for accidental or malicious requests.
+max_rows = 1000
+# Controls whether new tables, views, sequences and functions created in the `public` schema by
+# `postgres` are reachable through the Data API roles (`anon`, `authenticated`, `service_role`)
+# without explicit GRANTs, matching the cloud default. Set to `false` to require explicit GRANTs
+# instead. Left unset, a fresh project falls back to `true`.
+# auto_expose_new_tables = true
+
+[api.tls]
+# Enable HTTPS endpoints locally using a self-signed certificate.
+enabled = false
+# Paths to self-signed certificate pair.
+# cert_path = "../certs/my-cert.pem"
+# key_path = "../certs/my-key.pem"
+
+[db]
+# Port to use for the local database URL.
+port = 54322
+# Port used by db diff command to initialize the shadow database.
+shadow_port = 54320
+# Maximum amount of time to wait for health check when starting the local database.
+health_timeout = "2m"
+# The database major version to use. This has to be the same as your remote database's. Run `SHOW
+# server_version;` on the remote database to check.
+major_version = 17
+# OrioleDB version to use as the Postgres storage engine. Leave empty to use the default engine.
+orioledb_version = ""
+
+[db.pooler]
+enabled = false
+# Port to use for the local connection pooler.
+port = 54329
+# Specifies when a server connection can be reused by other clients.
+# Configure one of the supported pooler modes: `transaction`, `session`.
+pool_mode = "transaction"
+# How many server connections to allow per user/database pair.
+default_pool_size = 20
+# Maximum number of client connections allowed.
+max_client_conn = 100
+
+# [db.vault]
+# secret_key = "env(SECRET_VALUE)"
+
+[db.migrations]
+# If disabled, migrations will be skipped during a db push or reset.
+enabled = true
+# Specifies an ordered list of schema files, directories, or glob patterns that describe your database.
+# Supports paths relative to supabase directory: "./schemas/*.sql", "./database".
+schema_paths = []
+
+[db.seed]
+# If enabled, seeds the database after migrations during a db reset.
+enabled = true
+# Specifies an ordered list of seed files to load during db reset.
+# Supports glob patterns relative to supabase directory: "./seeds/*.sql"
+sql_paths = ["./seed.sql"]
+
+[db.network_restrictions]
+# Enable management of network restrictions.
+enabled = false
+# List of IPv4 CIDR blocks allowed to connect to the database.
+# Defaults to allow all IPv4 connections. Set empty array to block all IPs.
+allowed_cidrs = ["0.0.0.0/0"]
+# List of IPv6 CIDR blocks allowed to connect to the database.
+# Defaults to allow all IPv6 connections. Set empty array to block all IPs.
+allowed_cidrs_v6 = ["::/0"]
+
+# Uncomment to reject non-secure connections to the database.
+# [db.ssl_enforcement]
+# enabled = true
+
+[realtime]
+enabled = true
+# Bind realtime via either IPv4 or IPv6. (default: IPv4)
+# ip_version = "IPv6"
+# The maximum length in bytes of HTTP request headers. (default: 4096)
+# max_header_length = 4096
+
+[studio]
+enabled = true
+# Port to use for Supabase Studio.
+port = 54323
+# External URL of the API server that frontend connects to.
+api_url = "http://127.0.0.1"
+# OpenAI API Key to use for Supabase AI in the Supabase Studio.
+openai_api_key = "env(OPENAI_API_KEY)"
+
+# Email testing server. Emails sent with the local dev setup are not actually sent - rather, they
+# are monitored, and you can view the emails that would have been sent from the web interface.
+[local_smtp]
+enabled = true
+# Port to use for the email testing server web interface.
+port = 54324
+# Uncomment to expose additional ports for testing user applications that send emails.
+# smtp_port = 54325
+# pop3_port = 54326
+# admin_email = "admin@email.com"
+# sender_name = "Admin"
+
+[storage]
+enabled = true
+# The maximum file size allowed (e.g. "5MB", "500KB").
+file_size_limit = "50MiB"
+
+# Uncomment to configure local storage buckets
+# [storage.buckets.images]
+# public = false
+# file_size_limit = "50MiB"
+# allowed_mime_types = ["image/png", "image/jpeg"]
+# objects_path = "./images"
+
+# Allow connections via S3 compatible clients
+[storage.s3_protocol]
+enabled = true
+
+# Image transformation API is available to Supabase Pro plan.
+# [storage.image_transformation]
+# enabled = true
+
+# Store analytical data in S3 for running ETL jobs over Iceberg Catalog
+# This feature is only available on the hosted platform.
+[storage.analytics]
+enabled = false
+max_namespaces = 5
+max_tables = 10
+max_catalogs = 2
+
+# Analytics Buckets is available to Supabase Pro plan.
+# [storage.analytics.buckets.my-warehouse]
+
+# Store vector embeddings in S3 for large and durable datasets
+[storage.vector]
+enabled = true
+max_buckets = 10
+max_indexes = 5
+
+# Vector Buckets is available to Supabase Pro plan.
+# [storage.vector.buckets.documents-openai]
+
+[auth]
+enabled = true
+# The base URL of your website. Used as an allow-list for redirects and for constructing URLs used
+# in emails.
+site_url = "http://127.0.0.1:3000"
+# The public URL that Auth serves on. Defaults to the API external URL with `/auth/v1` appended.
+# external_url = ""
+# A list of *exact* URLs that auth providers are permitted to redirect to post authentication.
+additional_redirect_urls = ["https://127.0.0.1:3000"]
+# How long tokens are valid for, in seconds. Defaults to 3600 (1 hour), maximum 604,800 (1 week).
+jwt_expiry = 3600
+# JWT issuer URL. If not set, defaults to auth.external_url.
+# jwt_issuer = ""
+# Path to JWT signing key. DO NOT commit your signing keys file to git.
+# signing_keys_path = "./signing_keys.json"
+# If disabled, the refresh token will never expire.
+enable_refresh_token_rotation = true
+# Allows refresh tokens to be reused after expiry, up to the specified interval in seconds.
+# Requires enable_refresh_token_rotation = true.
+refresh_token_reuse_interval = 10
+# Allow/disallow new user signups to your project.
+enable_signup = true
+# Allow/disallow anonymous sign-ins to your project.
+enable_anonymous_sign_ins = false
+# Allow/disallow testing manual linking of accounts
+enable_manual_linking = false
+# Passwords shorter than this value will be rejected as weak. Minimum 6, recommended 8 or more.
+minimum_password_length = 6
+# Passwords that do not meet the following requirements will be rejected as weak. Supported values
+# are: `letters_digits`, `lower_upper_letters_digits`, `lower_upper_letters_digits_symbols`
+password_requirements = ""
+
+# Configure passkey sign-ins.
+# [auth.passkey]
+# enabled = false
+
+# Configure WebAuthn relying party settings (required when passkey is enabled).
+# [auth.webauthn]
+# rp_display_name = "Supabase"
+# rp_id = "localhost"
+# rp_origins = ["http://127.0.0.1:3000"]
+
+[auth.rate_limit]
+# Number of emails that can be sent per hour. Requires auth.email.smtp to be enabled.
+email_sent = 2
+# Number of SMS messages that can be sent per hour. Requires auth.sms to be enabled.
+sms_sent = 30
+# Number of anonymous sign-ins that can be made per hour per IP address. Requires enable_anonymous_sign_ins = true.
+anonymous_users = 30
+# Number of sessions that can be refreshed in a 5 minute interval per IP address.
+token_refresh = 150
+# Number of sign up and sign-in requests that can be made in a 5 minute interval per IP address (excludes anonymous users).
+sign_in_sign_ups = 30
+# Number of OTP / Magic link verifications that can be made in a 5 minute interval per IP address.
+token_verifications = 30
+# Number of Web3 logins that can be made in a 5 minute interval per IP address.
+web3 = 30
+
+# Configure one of the supported captcha providers: `hcaptcha`, `turnstile`.
+# [auth.captcha]
+# enabled = true
+# provider = "hcaptcha"
+# secret = ""
+
+[auth.email]
+# Allow/disallow new user signups via email to your project.
+enable_signup = true
+# If enabled, a user will be required to confirm any email change on both the old, and new email
+# addresses. If disabled, only the new email is required to confirm.
+double_confirm_changes = true
+# If enabled, users need to confirm their email address before signing in.
+enable_confirmations = false
+# If enabled, users will need to reauthenticate or have logged in recently to change their password.
+secure_password_change = false
+# Controls the minimum amount of time that must pass before sending another signup confirmation or password reset email.
+max_frequency = "1s"
+# Number of characters used in the email OTP.
+otp_length = 6
+# Number of seconds before the email OTP expires (defaults to 1 hour).
+otp_expiry = 3600
+
+# Use a production-ready SMTP server
+# [auth.email.smtp]
+# enabled = true
+# host = "smtp.sendgrid.net"
+# port = 587
+# user = "apikey"
+# pass = "env(SENDGRID_API_KEY)"
+# admin_email = "admin@email.com"
+# sender_name = "Admin"
+
+# Uncomment to customize email template
+# [auth.email.template.invite]
+# subject = "You have been invited"
+# content_path = "./supabase/templates/invite.html"
+
+# Uncomment to customize notification email template
+# [auth.email.notification.password_changed]
+# enabled = true
+# subject = "Your password has been changed"
+# content_path = "./supabase/templates/password_changed_notification.html"
+
+[auth.sms]
+# Allow/disallow new user signups via SMS to your project.
+enable_signup = false
+# If enabled, users need to confirm their phone number before signing in.
+enable_confirmations = false
+# Template for sending OTP to users
+template = "Your code is {{ .Code }}"
+# Controls the minimum amount of time that must pass before sending another sms otp.
+max_frequency = "5s"
+
+# Use pre-defined map of phone number to OTP for testing.
+# [auth.sms.test_otp]
+# 4152127777 = "123456"
+
+# Configure logged in session timeouts.
+# [auth.sessions]
+# Force log out after the specified duration.
+# timebox = "24h"
+# Force log out if the user has been inactive longer than the specified duration.
+# inactivity_timeout = "8h"
+
+# This hook runs before a new user is created and allows developers to reject the request based on the incoming user object.
+# [auth.hook.before_user_created]
+# enabled = true
+# uri = "pg-functions://postgres/auth/before-user-created-hook"
+
+# This hook runs before a token is issued and allows you to add additional claims based on the authentication method used.
+# [auth.hook.custom_access_token]
+# enabled = true
+# uri = "pg-functions://<database>/<schema>/<hook_name>"
+
+# Configure one of the supported SMS providers: `twilio`, `twilio_verify`, `messagebird`, `textlocal`, `vonage`.
+[auth.sms.twilio]
+enabled = false
+account_sid = ""
+message_service_sid = ""
+# DO NOT commit your Twilio auth token to git. Use environment variable substitution instead:
+auth_token = "env(SUPABASE_AUTH_SMS_TWILIO_AUTH_TOKEN)"
+
+# Multi-factor-authentication is available to Supabase Pro plan.
+[auth.mfa]
+# Control how many MFA factors can be enrolled at once per user.
+max_enrolled_factors = 10
+
+# Control MFA via App Authenticator (TOTP)
+[auth.mfa.totp]
+enroll_enabled = false
+verify_enabled = false
+
+# Configure MFA via Phone Messaging
+[auth.mfa.phone]
+enroll_enabled = false
+verify_enabled = false
+otp_length = 6
+template = "Your code is {{ .Code }}"
+max_frequency = "5s"
+
+# Configure MFA via WebAuthn
+# [auth.mfa.web_authn]
+# enroll_enabled = true
+# verify_enabled = true
+
+# Use an external OAuth provider. The full list of providers are: `apple`, `azure`, `bitbucket`,
+# `discord`, `facebook`, `github`, `gitlab`, `google`, `keycloak`, `linkedin_oidc`, `notion`, `twitch`,
+# `twitter`, `x`, `slack`, `spotify`, `workos`, `zoom`.
+[auth.external.apple]
+enabled = false
+client_id = ""
+# DO NOT commit your OAuth provider secret to git. Use environment variable substitution instead:
+secret = "env(SUPABASE_AUTH_EXTERNAL_APPLE_SECRET)"
+# Overrides the default auth callback URL derived from auth.external_url.
+redirect_uri = ""
+# Overrides the default auth provider URL. Used to support self-hosted gitlab, single-tenant Azure,
+# or any other third-party OIDC providers.
+url = ""
+# If enabled, the nonce check will be skipped. Required for local sign in with Google auth.
+skip_nonce_check = false
+# If enabled, it will allow the user to successfully authenticate when the provider does not return an email address.
+email_optional = false
+
+# Allow Solana wallet holders to sign in to your project via the Sign in with Solana (SIWS, EIP-4361) standard.
+# You can configure "web3" rate limit in the [auth.rate_limit] section and set up [auth.captcha] if self-hosting.
+[auth.web3.solana]
+enabled = false
+
+# Use Firebase Auth as a third-party provider alongside Supabase Auth.
+[auth.third_party.firebase]
+enabled = false
+# project_id = "my-firebase-project"
+
+# Use Auth0 as a third-party provider alongside Supabase Auth.
+[auth.third_party.auth0]
+enabled = false
+# tenant = "my-auth0-tenant"
+# tenant_region = "us"
+
+# Use AWS Cognito (Amplify) as a third-party provider alongside Supabase Auth.
+[auth.third_party.aws_cognito]
+enabled = false
+# user_pool_id = "my-user-pool-id"
+# user_pool_region = "us-east-1"
+
+# Use Clerk as a third-party provider alongside Supabase Auth.
+[auth.third_party.clerk]
+enabled = false
+# Obtain from https://clerk.com/setup/supabase
+# domain = "example.clerk.accounts.dev"
+
+# OAuth server configuration
+[auth.oauth_server]
+# Enable OAuth server functionality
+enabled = false
+# Path for OAuth consent flow UI
+authorization_url_path = "/oauth/consent"
+# Allow dynamic client registration
+allow_dynamic_registration = false
+
+[edge_runtime]
+enabled = true
+# Supported request policies: `oneshot`, `per_worker`.
+# `per_worker` (default) — enables hot reload during local development.
+# `oneshot` — fallback mode if hot reload causes issues (e.g. in large repos or with symlinks).
+policy = "per_worker"
+# Port to attach the Chrome inspector for debugging edge functions.
+inspector_port = 8083
+# The Deno major version to use.
+deno_version = 2
+
+# [edge_runtime.secrets]
+# secret_key = "env(SECRET_VALUE)"
+
+[analytics]
+enabled = true
+port = 54327
+# Configure one of the supported backends: `postgres`, `bigquery`.
+backend = "postgres"
+
+# Experimental features may be deprecated any time
+[experimental]
+# Configures S3 bucket URL, eg. <bucket_name>.s3-<region>.amazonaws.com
+s3_host = "env(S3_HOST)"
+# Configures S3 bucket region, eg. us-east-1
+s3_region = "env(S3_REGION)"
+# Configures AWS_ACCESS_KEY_ID for S3 bucket
+s3_access_key = "env(S3_ACCESS_KEY)"
+# Configures AWS_SECRET_ACCESS_KEY for S3 bucket
+s3_secret_key = "env(S3_SECRET_KEY)"
+
+# pg-delta is the schema diff engine for db diff / db pull / db remote commit.
+# Set enabled = false to fall back to the legacy migra engine.
+[experimental.pgdelta]
+enabled = true
+# Directory under `supabase/` where declarative files are written.
+# declarative_schema_path = "./schemas"
+# JSON string passed through to pg-delta SQL formatting. When omitted, SQL is
+# formatted with uppercase keywords, indent 2, max width 180, trailing commas,
+# and column/key alignment. Set to "null" to emit raw, unformatted SQL.
+# format_options = "{\"keywordCase\":\"upper\",\"indent\":2,\"maxWidth\":180,\"commaStyle\":\"trailing\"}"
+
+# Local draft: public game endpoints; server-side input validation is required.
+[functions.arcade-challenge-issue]
+verify_jwt = false
+
+[functions.arcade-challenge-activate]
+verify_jwt = false
+
+
+======================== FILE: supabase\functions\arcade-challenge-activate\index.ts ========================
+import { createClient } from "npm:@supabase/supabase-js@2.57.4";
+
+const corsHeaders = {
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Methods": "POST, OPTIONS",
+  "Content-Type": "application/json",
+};
+
+function allowedOrigins(): Set<string> {
+  const configured = Deno.env.get("ARCADE_ALLOWED_ORIGINS");
+  return new Set(
+    (configured
+      ? configured.split(",")
+      : ["http://localhost:5173", "http://127.0.0.1:5173"])
+      .map((origin) => origin.trim())
+      .filter(Boolean),
+  );
+}
+
+function respond(
+  req: Request,
+  body: Record<string, unknown>,
+  status = 200,
+): Response {
+  const origin = req.headers.get("origin");
+  const headers = new Headers(corsHeaders);
+
+  if (origin && allowedOrigins().has(origin)) {
+    headers.set("Access-Control-Allow-Origin", origin);
+    headers.set("Vary", "Origin");
+  }
+
+  return new Response(JSON.stringify(body), { status, headers });
+}
+
+Deno.serve(async (req: Request) => {
+  if (req.method === "OPTIONS") {
+    const origin = req.headers.get("origin");
+    if (origin && !allowedOrigins().has(origin)) {
+      return respond(req, { error: "Origin not allowed" }, 403);
+    }
+    return new Response(null, {
+      status: 204,
+      headers: {
+        ...corsHeaders,
+        ...(origin ? { "Access-Control-Allow-Origin": origin, "Vary": "Origin" } : {}),
+      },
+    });
+  }
+
+  if (req.method !== "POST") {
+    return respond(req, { error: "Method not allowed" }, 405);
+  }
+
+  const origin = req.headers.get("origin");
+  if (origin && !allowedOrigins().has(origin)) {
+    return respond(req, { error: "Origin not allowed" }, 403);
+  }
+
+  let body: unknown;
+  try {
+    body = await req.json();
+  } catch {
+    return respond(req, { error: "Request body must be valid JSON" }, 400);
+  }
+
+  const challengeId =
+    typeof body === "object" && body !== null && "challenge_id" in body
+      ? (body as Record<string, unknown>).challenge_id
+      : null;
+
+  if (
+    typeof challengeId !== "string" ||
+    !/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(challengeId)
+  ) {
+    return respond(req, { error: "A valid challenge_id is required" }, 400);
+  }
+
+  const url = Deno.env.get("SUPABASE_URL");
+  const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+
+  if (!url || !serviceKey) {
+    console.error("Missing server-side Supabase environment configuration");
+    return respond(req, { error: "Server configuration unavailable" }, 500);
+  }
+
+  try {
+    const supabase = createClient(url, serviceKey, {
+      auth: { persistSession: false, autoRefreshToken: false },
+    });
+
+    const { data, error } = await supabase.rpc("activate_arcade_challenge", {
+      p_challenge_id: challengeId,
+    });
+
+    if (error) {
+      console.error("Challenge activation RPC failed:", error.message);
+      return respond(req, { error: "Could not activate challenge" }, 400);
+    }
+
+    const challenge = Array.isArray(data) ? data[0] : null;
+    if (
+      !challenge?.challenge_id ||
+      !challenge.activated_at ||
+      !challenge.expires_at ||
+      !challenge.game_rules_version
+    ) {
+      console.error("Challenge activation returned an unexpected result");
+      return respond(req, { error: "Invalid activation response" }, 500);
+    }
+
+    return respond(req, { challenge });
+  } catch (error) {
+    console.error("Challenge activation failed:", error);
+    return respond(req, { error: "Internal server error" }, 500);
+  }
+});
+
+
+======================== FILE: supabase\functions\arcade-challenge-issue\index.ts ========================
+import { createClient } from "npm:@supabase/supabase-js@2.57.4";
+
+const corsHeaders = {
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Methods": "POST, OPTIONS",
+  "Content-Type": "application/json",
+};
+
+function allowedOrigins(): Set<string> {
+  const configured = Deno.env.get("ARCADE_ALLOWED_ORIGINS");
+  return new Set(
+    (configured
+      ? configured.split(",")
+      : ["http://localhost:5173", "http://127.0.0.1:5173"])
+      .map((origin) => origin.trim())
+      .filter(Boolean),
+  );
+}
+
+function respond(
+  req: Request,
+  body: Record<string, unknown>,
+  status = 200,
+): Response {
+  const origin = req.headers.get("origin");
+  const headers = new Headers(corsHeaders);
+
+  if (origin && allowedOrigins().has(origin)) {
+    headers.set("Access-Control-Allow-Origin", origin);
+    headers.set("Vary", "Origin");
+  }
+
+  return new Response(JSON.stringify(body), { status, headers });
+}
+
+Deno.serve(async (req: Request) => {
+  if (req.method === "OPTIONS") {
+    const origin = req.headers.get("origin");
+    if (origin && !allowedOrigins().has(origin)) {
+      return respond(req, { error: "Origin not allowed" }, 403);
+    }
+    return new Response(null, {
+      status: 204,
+      headers: {
+        ...corsHeaders,
+        ...(origin ? { "Access-Control-Allow-Origin": origin, "Vary": "Origin" } : {}),
+      },
+    });
+  }
+
+  if (req.method !== "POST") {
+    return respond(req, { error: "Method not allowed" }, 405);
+  }
+
+  const origin = req.headers.get("origin");
+  if (origin && !allowedOrigins().has(origin)) {
+    return respond(req, { error: "Origin not allowed" }, 403);
+  }
+
+  const url = Deno.env.get("SUPABASE_URL");
+  const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+
+  if (!url || !serviceKey) {
+    console.error("Missing server-side Supabase environment configuration");
+    return respond(req, { error: "Server configuration unavailable" }, 500);
+  }
+
+  try {
+    const supabase = createClient(url, serviceKey, {
+      auth: { persistSession: false, autoRefreshToken: false },
+    });
+
+    const { data, error } = await supabase.rpc("issue_arcade_challenge");
+
+    if (error) {
+      console.error("Challenge issuance RPC failed:", error.message);
+      return respond(req, { error: "Could not issue challenge" }, 500);
+    }
+
+    const challenge = Array.isArray(data) ? data[0] : null;
+    if (
+      !challenge?.challenge_id ||
+      challenge.seed === undefined ||
+      !challenge.expires_at ||
+      !challenge.game_rules_version
+    ) {
+      console.error("Challenge issuance returned an unexpected result");
+      return respond(req, { error: "Invalid challenge response" }, 500);
+    }
+
+    return respond(req, { challenge });
+  } catch (error) {
+    console.error("Challenge issuance failed:", error);
+    return respond(req, { error: "Internal server error" }, 500);
+  }
+});
+
+
+======================== FILE: supabase\migrations\20261012053834_arcade_score_verification.sql ========================
+-- TwitchTrap free-play score verification.
+-- LOCAL DRAFT ONLY. Do not apply until reviewed and tested.
+
+begin;
+
+create schema if not exists private;
+
+revoke all on schema private from public, anon, authenticated;
+grant usage on schema private to service_role;
+
+create table private.arcade_run_challenges (
+    challenge_id uuid primary key default gen_random_uuid(),
+    seed bigint not null,
+    game_rules_version text not null default 'arcade-v1',
+    status text not null default 'issued'
+        check (status in ('issued', 'active', 'verified', 'rejected', 'expired')),
+    issued_at timestamptz not null default clock_timestamp(),
+    activated_at timestamptz,
+    finished_at timestamptz,
+    expires_at timestamptz not null,
+    verified_survival_seconds numeric,
+    rejection_reason text,
+    constraint arcade_run_challenge_expiry_check
+        check (expires_at > issued_at),
+    constraint arcade_run_challenge_timing_check
+        check (activated_at is null or activated_at >= issued_at)
+);
+
+create index arcade_run_challenges_expiry_idx
+    on private.arcade_run_challenges (expires_at);
+
+alter table private.arcade_run_challenges enable row level security;
+
+revoke all on private.arcade_run_challenges
+    from public, anon, authenticated;
+
+grant select, insert, update
+    on private.arcade_run_challenges to service_role;
+
+-- The public leaderboard remains readable, but clients cannot write scores.
+revoke insert, update, delete
+    on public.arcade_scores from public, anon, authenticated;
+
+revoke all on sequence public.arcade_scores_id_seq
+    from public, anon, authenticated;
+
+grant usage on sequence public.arcade_scores_id_seq to service_role;
+
+-- Every leaderboard entry must reference one unique server-issued challenge.
+alter table public.arcade_scores
+    add column verification_challenge_id uuid not null;
+
+alter table public.arcade_scores
+    add constraint arcade_scores_verification_challenge_id_key
+    unique (verification_challenge_id);
+
+alter table public.arcade_scores
+    add constraint arcade_scores_verification_challenge_id_fkey
+    foreign key (verification_challenge_id)
+    references private.arcade_run_challenges (challenge_id);
+
+grant insert, select, update
+    on public.arcade_scores to service_role;
+
+-- Issue a short-lived challenge. Only the trusted Edge Function may call this.
+create or replace function public.issue_arcade_challenge()
+returns table (
+    challenge_id uuid,
+    seed bigint,
+    expires_at timestamptz,
+    game_rules_version text
+)
+language plpgsql
+security definer
+set search_path = ''
+as $function$
+declare
+    v_id uuid;
+    v_seed bigint;
+    v_now timestamptz;
+    v_expires_at timestamptz;
+begin
+    v_now := pg_catalog.clock_timestamp();
+    v_expires_at := v_now + interval '2 minutes';
+    v_seed := floor(random() * 2147483647)::bigint;
+
+    insert into private.arcade_run_challenges (
+        seed,
+        game_rules_version,
+        status,
+        issued_at,
+        expires_at
+    )
+    values (
+        v_seed,
+        'arcade-v1',
+        'issued',
+        v_now,
+        v_expires_at
+    )
+    returning private.arcade_run_challenges.challenge_id
+         into v_id;
+
+    return query
+    select v_id, v_seed, v_expires_at, 'arcade-v1'::text;
+end;
+$function$;
+
+revoke all on function public.issue_arcade_challenge()
+    from public, anon, authenticated;
+
+grant execute on function public.issue_arcade_challenge()
+    to service_role;
+
+
+-- Activate once, before the issuance deadline. Activation starts server timing
+-- and extends expires_at to allow a maximum run plus a 120-second grace period.
+create or replace function public.activate_arcade_challenge(
+    p_challenge_id uuid
+)
+returns table (
+    challenge_id uuid,
+    activated_at timestamptz,
+    expires_at timestamptz,
+    game_rules_version text
+)
+language plpgsql
+security definer
+set search_path = ''
+as $function$
+declare
+    v_challenge private.arcade_run_challenges%rowtype;
+    v_now timestamptz;
+    v_run_expires_at timestamptz;
+begin
+    if p_challenge_id is null then
+        raise exception 'Challenge ID is required';
+    end if;
+
+    select c.*
+      into v_challenge
+      from private.arcade_run_challenges as c
+     where c.challenge_id = p_challenge_id
+     for update;
+
+    if not found then
+        raise exception 'Challenge not found';
+    end if;
+
+    if v_challenge.status <> 'issued' then
+        raise exception 'Challenge is not issued or has already been activated';
+    end if;
+
+    v_now := pg_catalog.clock_timestamp();
+
+    if v_challenge.expires_at <= v_now then
+        raise exception 'Challenge activation deadline has expired';
+    end if;
+
+    v_run_expires_at := v_now + interval '3720 seconds';
+
+    update private.arcade_run_challenges
+       set status = 'active',
+           activated_at = v_now,
+           expires_at = v_run_expires_at
+     where private.arcade_run_challenges.challenge_id = p_challenge_id
+       and private.arcade_run_challenges.status = 'issued';
+
+    if not found then
+        raise exception 'Challenge could not be activated';
+    end if;
+
+    return query
+    select
+        p_challenge_id,
+        v_now,
+        v_run_expires_at,
+        v_challenge.game_rules_version;
+end;
+$function$;
+
+revoke all on function public.activate_arcade_challenge(uuid)
+    from public, anon, authenticated;
+
+grant execute on function public.activate_arcade_challenge(uuid)
+    to service_role;
+
+-- Atomically consume a challenge and insert its verified leaderboard score.
+-- The Edge Function must validate the gameplay evidence before calling this.
+create or replace function public.finalize_arcade_score(
+    p_challenge_id uuid,
+    p_display_name text,
+    p_survival_seconds numeric
+)
+returns table (
+    score_id bigint,
+    display_name text,
+    survival_seconds numeric,
+    created_at timestamptz
+)
+language plpgsql
+security definer
+set search_path = ''
+as $function$
+declare
+    v_challenge private.arcade_run_challenges%rowtype;
+    v_display_name text;
+    v_now timestamptz;
+    v_score_id bigint;
+    v_created_at timestamptz;
+begin
+    v_display_name := pg_catalog.btrim(p_display_name);
+
+    if p_challenge_id is null then
+        raise exception 'Challenge ID is required';
+    end if;
+
+    if v_display_name is null
+       or pg_catalog.char_length(v_display_name) < 1
+       or pg_catalog.char_length(v_display_name) > 24 then
+        raise exception 'Display name must be 1 to 24 characters';
+    end if;
+
+    if p_survival_seconds is null
+       or p_survival_seconds <= 0
+       or p_survival_seconds > 3600 then
+        raise exception 'Survival time is outside the permitted range';
+    end if;
+
+    select c.*
+      into v_challenge
+      from private.arcade_run_challenges as c
+     where c.challenge_id = p_challenge_id
+     for update;
+
+    if not found then
+        raise exception 'Challenge not found';
+    end if;
+
+    if v_challenge.status <> 'active' then
+        raise exception 'Challenge is not active or has already been consumed';
+    end if;
+
+    v_now := pg_catalog.clock_timestamp();
+
+    if v_challenge.activated_at is null then
+        raise exception 'Challenge has no activation timestamp';
+    end if;
+
+    if v_challenge.expires_at <= v_now then
+        raise exception 'Challenge has expired';
+    end if;
+
+    -- The submitted duration cannot exceed server-measured active-run time.
+    -- The verifier must independently validate the actual gameplay trace.
+    if p_survival_seconds >
+       extract(epoch from (v_now - v_challenge.activated_at)) then
+        raise exception 'Submitted duration exceeds server-measured run time';
+    end if;
+
+    update private.arcade_run_challenges
+       set status = 'verified',
+           finished_at = v_now,
+           verified_survival_seconds = p_survival_seconds,
+           rejection_reason = null
+     where challenge_id = p_challenge_id
+       and status = 'active';
+
+    if not found then
+        raise exception 'Challenge could not be consumed';
+    end if;
+
+    insert into public.arcade_scores (
+        display_name,
+        survival_seconds,
+        verified,
+        verification_challenge_id
+    )
+    values (
+        v_display_name,
+        p_survival_seconds,
+        true,
+        p_challenge_id
+    )
+    returning id, public.arcade_scores.created_at
+         into v_score_id, v_created_at;
+
+    return query
+    select v_score_id, v_display_name, p_survival_seconds, v_created_at;
+end;
+$function$;
+
+revoke all on function public.finalize_arcade_score(uuid, text, numeric)
+    from public, anon, authenticated;
+
+grant execute on function public.finalize_arcade_score(uuid, text, numeric)
+    to service_role;
+
+commit;
+
+
+
+================ GIT DIFF =================
+
+================ TRACKING STATUS =================
+ M package-lock.json
+ M package.json
+ M src/game/ArcadeGame.jsx
+?? audit-batch-20261012-100756.txt
+?? design-inspection.txt
+?? pre-release-audit-20261012-102255.txt
+?? src/App.jsx.backup-before-leaderboard-20261011-214530
+?? src/App.jsx.bak-design-20261011-184739
+?? src/game/ArcadeGame.css.bak-design-20261011-184739
+?? src/game/ArcadeGame.jsx.20261011-180444.bak
+?? src/game/ArcadeGame.jsx.20261011-181305.bak
+?? src/game/ArcadeGame.jsx.backup-20261011-185508
+?? src/game/ArcadeGame.jsx.backup-batch-fix-20261012-101543
+?? src/game/ArcadeGame.jsx.backup-challenge-integration-20261012-095906
+?? src/game/ArcadeGame.jsx.backup-correction-20261012-103212
+?? src/game/ArcadeGame.jsx.backup-degen-roasts-20261011-190514
+?? src/game/ArcadeGame.jsx.backup-encoding-20261011-193501
+?? src/game/ArcadeGame.jsx.backup-eof-fix-20261012-105913
+?? src/game/ArcadeGame.jsx.backup-full-correction-20261012-105532
+?? src/game/ArcadeGame.jsx.backup-result-fix-20261011-190300
+?? src/game/ArcadeGame.jsx.backup-safe-local-20261012-103606
+?? src/game/ArcadeGame.jsx.bak-20261011-183008
+?? src/game/ArcadeGame.jsx.bak-design-20261011-184739
+?? src/game/arcadeRules.js
+?? src/game/arcadeRules.js.backup-full-pass-20261012-110502
+?? src/game/arcadeRules.js.backup-initial-position-20261012-110048
+?? src/game/arcadeRules.js.backup-y-fix-20261012-105913
+?? src/game/arcadeRules.test.js
+?? src/game/arcadeRules.test.js.backup-full-correction-20261012-105532
+?? src/game/audio.js.20261011-180444.bak
+?? src/game/audio.js.20261011-181305.bak
+?? src/game/audio.js.bak-20261011-183120
+?? src/game/audio.js.bak-20261011-183242
+?? src/styles/global.css.bak-design-20261011-184739
+?? supabase/
+?? twitchtrap-review-20261012-110502.zip

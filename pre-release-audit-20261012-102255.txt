@@ -1,0 +1,87 @@
+﻿**********************
+Windows PowerShell transcript start
+Start time: 20261012102255
+Username: MHESH\Shalom Fountain
+RunAs User: MHESH\Shalom Fountain
+Configuration Name: 
+Machine: MHESH (Microsoft Windows NT 10.0.26200.0)
+Host Application: C:\WINDOWS\System32\WindowsPowerShell\v1.0\powershell.exe -noexit -command try { . "c:\Users\gkbye\AppData\Local\Programs\Microsoft VS Code\2a59476c9b\resources\app\out\vs\workbench\contrib\terminal\common\scripts\shellIntegration.ps1" } catch {}
+Process ID: 38144
+PSVersion: 5.1.26100.9444
+PSEdition: Desktop
+PSCompatibleVersions: 1.0, 2.0, 3.0, 4.0, 5.0, 5.1.26100.9444
+BuildVersion: 10.0.26100.9444
+CLRVersion: 4.0.30319.42000
+WSManStackVersion: 3.0
+PSRemotingProtocolVersion: 2.3
+SerializationVersion: 1.1.0.1
+**********************
+]633;D;0]633;A]633;P;Cwd=C:\x5cUsers\x5cgkbye\x5ctwitchtrap-gamePS C:\Users\gkbye\twitchtrap-game> ]633;B
+]633;D]633;A]633;P;Cwd=C:\x5cUsers\x5cgkbye\x5ctwitchtrap-gamePS C:\Users\gkbye\twitchtrap-game> ]633;B
+PS>try {
+    Write-Host "`n===== 1. WHITESPACE / PATCH INTEGRITY ====="
+    git diff --check
+    if ($LASTEXITCODE -ne 0) {
+        Write-Host "WARNING: git diff --check reported a problem."
+    }
+
+    Write-Host "`n===== 2. CHANGE SUMMARY ====="
+    git status --short
+    git diff --stat
+
+    Write-Host "`n===== 3. PACKAGE CHANGES ====="
+    git diff -- package.json package-lock.json
+
+    Write-Host "`n===== 4. GAME SOURCE CHANGES ====="
+    git diff -- src/game/ArcadeGame.jsx
+
+    Write-Host "`n===== 5. TIMEOUT IMPLEMENTATION ====="
+    Select-String -Path "src/game/ArcadeGame.jsx" `
+      -Pattern "CHALLENGE_REQUEST_TIMEOUT_MS|function withTimeout|Challenge activation timed out|Challenge issuance timed out"
+
+    Write-Host "`n===== 6. SUPABASE FILE INVENTORY ====="
+    if (Test-Path "supabase") {
+        Get-ChildItem "supabase" -Recurse -File |
+          Where-Object {
+              $_.FullName -notmatch '\\\.temp\\' -and
+              $_.Name -notmatch '\.env'
+          } |
+          Select-Object FullName, Length
+    }
+
+    Write-Host "`n===== 7. CLIENT SCORE WRITE CHECK ====="
+    $scoreWrites = Get-ChildItem "src" -Recurse -File -Include *.js,*.jsx,*.ts,*.tsx |
+      Select-String -Pattern 'arcade_scores.*(insert|upsert)|\.insert\(|\.upsert\('
+
+    if ($scoreWrites) {
+        $scoreWrites | Select-Object Path, LineNumber, Line
+    } else {
+        Write-Host "No matching client write calls found."
+    }
+
+    Write-Host "`n===== 8. TRACKED VS UNTRACKED FILES ====="
+    git status --short --untracked-files=all
+
+    Write-Host "`n===== 9. CURRENT BRANCH / HEAD ====="
+    git branch --show-current
+    git log -1 --oneline
+}
+finally {
+    Stop-Transcript | Out-Null
+}
+
+===== 1. WHITESPACE / PATCH INTEGRITY =====
+
+WARNING: git diff --check reported a problem.
+
+===== 2. CHANGE SUMMARY =====
+
+
+
+===== 3. PACKAGE CHANGES =====
+
+PS>TerminatingError(): "The pipeline has been stopped."
+**********************
+Windows PowerShell transcript end
+End time: 20261012102438
+**********************

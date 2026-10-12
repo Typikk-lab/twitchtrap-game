@@ -1,0 +1,259 @@
+export function createAudioEngine() {
+  let context = null
+  let master = null
+  let muted = false
+  let scene = 'menu'
+  let intensity = 0
+  let step = 0
+  let timer = null
+  let deathTimer = null
+  let deathTimer = null
+  let lastPulseSecond = -1
+
+  const menuNotes = [659, 0, 523, 784, 0, 587, 392, 0, 523, 0, 880, 784, 0, 587, 494, 0]
+  const gameNotes = [110, 165, 220, 330, 247, 370, 294, 440, 330, 494, 370, 554, 330, 494, 247, 370]
+
+  function ensureContext() {
+    if (typeof window === 'undefined') return null
+
+    const AudioContextClass = window.AudioContext || window.webkitAudioContext
+    if (!AudioContextClass) return null
+
+    if (!context) {
+      context = new AudioContextClass()
+      master = context.createGain()
+      master.gain.value = muted ? 0 : 0.65
+      master.connect(context.destination)
+    }
+
+    return context
+  }
+
+  async function unlock() {
+    const audio = ensureContext()
+    if (!audio) return false
+
+    if (audio.state === 'suspended') {
+      try {
+        await audio.resume()
+      } catch {
+        return false
+      }
+    }
+
+    startLoop()
+    return audio.state === 'running'
+  }
+
+  function tone(frequency, duration, options = {}) {
+    if (muted || !context || !master || context.state !== 'running') return
+
+    const {
+      type = 'sine',
+      endFrequency = frequency,
+      volume = 0.12,
+      delay = 0,
+    } = options
+
+    const start = context.currentTime + delay
+    const oscillator = context.createOscillator()
+    const envelope = context.createGain()
+
+    oscillator.type = type
+    oscillator.frequency.setValueAtTime(Math.max(20, frequency), start)
+    oscillator.frequency.exponentialRampToValueAtTime(
+      Math.max(20, endFrequency),
+      start + duration,
+    )
+
+    envelope.gain.setValueAtTime(0.0001, start)
+    envelope.gain.exponentialRampToValueAtTime(Math.max(0.0002, volume), start + 0.012)
+    envelope.gain.exponentialRampToValueAtTime(0.0001, start + duration)
+
+    oscillator.connect(envelope)
+    envelope.connect(master)
+    oscillator.start(start)
+    oscillator.stop(start + duration + 0.02)
+  }
+
+  function tick() {
+    if (muted || !context || context.state !== 'running') return
+
+    if (scene === 'menu') {
+      const note = menuNotes[step % menuNotes.length]
+
+      if (note > 0) {
+        tone(note, 0.105, {
+          type: 'square',
+          endFrequency: note * 0.985,
+          volume: 0.045,
+        })
+      }
+
+      if (step % 4 === 0) {
+        tone(step % 8 === 0 ? 98 : 123, 0.16, {
+          type: 'triangle',
+          endFrequency: 70,
+          volume: 0.075,
+        })
+      }
+
+      if (step % 8 === 6) {
+        tone(1047, 0.07, {
+          type: 'square',
+          endFrequency: 784,
+          volume: 0.025,
+          delay: 0.035,
+        })
+      }
+
+      step += 1
+      return
+    }
+
+    if (scene === 'gameplay') {
+      const note = gameNotes[step % gameNotes.length]
+      const pitch = 1 + intensity * 0.45
+      const volume = 0.045 + intensity * 0.025
+
+      tone(note * pitch, 0.095, {
+        type: 'square',
+        endFrequency: note * pitch * 1.015,
+        volume,
+      })
+
+      if (step % 4 === 0) {
+        tone(55 + intensity * 22, 0.19, {
+          type: 'sawtooth',
+          endFrequency: 38 + intensity * 10,
+          volume: 0.075 + intensity * 0.025,
+        })
+      }
+
+      if (step % 8 === 4) {
+        tone(660 + intensity * 440, 0.065, {
+          type: 'triangle',
+          endFrequency: 880 + intensity * 550,
+          volume: 0.035 + intensity * 0.025,
+          delay: 0.035,
+        })
+      }
+
+      step += 1
+    }
+  }
+
+  function startLoop() {
+    if (timer !== null || muted || !context || context.state !== 'running') return
+    timer = window.setInterval(tick, 125)
+  }
+
+  function stopLoop() {
+    if (timer !== null) {
+      window.clearInterval(timer)
+      timer = null
+    }
+  }
+
+  function setScene(nextScene) {
+    if (scene === nextScene) return
+    scene = nextScene
+    step = 0
+    stopLoop()
+    startLoop()
+  }
+
+  function setIntensity(nextIntensity) {
+    intensity = Math.max(0, Math.min(1, nextIntensity))
+  }
+
+  function isReady() {
+    return Boolean(context && context.state === 'running')
+  }
+
+  function lockIn() {
+    tone(440, 0.16, { type: 'triangle', endFrequency: 660, volume: 0.14 })
+    tone(880, 0.22, {
+      type: 'sine',
+      endFrequency: 1320,
+      volume: 0.09,
+      delay: 0.11,
+    })
+  }
+
+  function runPulse(second) {
+    if (second <= 0 || second % 3 !== 0 || second === lastPulseSecond) return
+
+    lastPulseSecond = second
+    const urgency = Math.min(second / 30, 1)
+
+    tone(180 + urgency * 100, 0.12, {
+      type: 'triangle',
+      endFrequency: 100 + urgency * 40,
+      volume: 0.035 + urgency * 0.025,
+    })
+  }
+
+  function death() {
+    if (deathTimer !== null) {
+      window.clearTimeout(deathTimer)
+      deathTimer = null
+    }
+
+    setScene('death')
+
+    // A short, exaggerated arcade elimination sting.
+    tone(115, 0.48, { type: 'sawtooth', endFrequency: 32, volume: 0.24 })
+    tone(68, 0.38, { type: 'square', endFrequency: 35, volume: 0.12, delay: 0.025 })
+    tone(920, 0.07, { type: 'square', endFrequency: 170, volume: 0.055, delay: 0.04 })
+    tone(440, 0.09, { type: 'sawtooth', endFrequency: 90, volume: 0.045, delay: 0.13 })
+
+    // Return to the menu soundtrack after the sting finishes.
+    deathTimer = window.setTimeout(() => {
+      deathTimer = null
+      setScene('menu')
+    }, 680)
+  }
+
+  function setMuted(nextMuted) {
+    muted = Boolean(nextMuted)
+
+    if (master && context) {
+      master.gain.setTargetAtTime(
+        muted ? 0 : 0.65,
+        context.currentTime,
+        0.025,
+      )
+    }
+
+    if (muted) stopLoop()
+    else startLoop()
+  }
+
+  function dispose() {
+    stopLoop()
+    if (deathTimer !== null) {
+      window.clearTimeout(deathTimer)
+      deathTimer = null
+    }
+
+    if (context && context.state !== 'closed') {
+      context.close().catch(() => {})
+    }
+
+    context = null
+    master = null
+  }
+
+  return {
+    unlock,
+    lockIn,
+    runPulse,
+    death,
+    setMuted,
+    setScene,
+    setIntensity,
+    isReady,
+    dispose,
+  }
+}
