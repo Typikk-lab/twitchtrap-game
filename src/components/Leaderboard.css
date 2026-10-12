@@ -1,0 +1,228 @@
+﻿.leaderboard {
+  width: min(100% - 32px, 900px);
+  margin: 28px auto 36px;
+  padding: clamp(16px, 3vw, 26px);
+  border: 1px solid rgba(173, 120, 255, .3);
+  background:
+    linear-gradient(135deg, rgba(255, 56, 184, .045), transparent 42%),
+    #0d0915;
+  color: #f8efff;
+  box-shadow: inset 0 0 28px rgba(0, 0, 0, .2);
+}
+
+.leaderboard-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid rgba(173, 120, 255, .22);
+}
+
+.leaderboard-kicker {
+  margin: 0 0 9px;
+  color: #00eaff;
+  font-family: Silkscreen, monospace;
+  font-size: 8px;
+  letter-spacing: .1em;
+  line-height: 1.7;
+}
+
+.leaderboard-header h2 {
+  margin: 0;
+  color: #ff38b8;
+  font-family: Silkscreen, monospace;
+  font-size: clamp(16px, 3vw, 24px);
+  line-height: 1.5;
+  text-shadow: 0 0 15px rgba(255, 56, 184, .18);
+}
+
+.leaderboard-description {
+  margin: 7px 0 0;
+  color: #a99ab9;
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.leaderboard-live {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  flex: 0 0 auto;
+  padding: 7px 9px;
+  border: 1px solid rgba(0, 234, 255, .24);
+  color: #00eaff;
+  font-family: Silkscreen, monospace;
+  font-size: 7px;
+  letter-spacing: .04em;
+}
+
+.leaderboard-live span {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #00eaff;
+  box-shadow: 0 0 8px rgba(0, 234, 255, .7);
+}
+
+.leaderboard-columns,
+.leaderboard-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+}
+
+.leaderboard-columns {
+  padding: 14px 10px 9px;
+  color: #82718f;
+  font-family: Silkscreen, monospace;
+  font-size: 7px;
+  letter-spacing: .04em;
+}
+
+.leaderboard-columns span:last-child {
+  text-align: right;
+}
+
+.leaderboard-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.leaderboard-row {
+  min-height: 53px;
+  padding: 9px 10px;
+  border-top: 1px solid rgba(173, 120, 255, .12);
+  background: rgba(255, 255, 255, .012);
+}
+
+.leaderboard-row:nth-child(even) {
+  background: rgba(173, 120, 255, .035);
+}
+
+.leaderboard-first {
+  background: linear-gradient(90deg, rgba(255, 209, 102, .09), transparent 75%);
+}
+
+.leaderboard-player {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  min-width: 0;
+}
+
+.leaderboard-rank {
+  flex: 0 0 23px;
+  color: #82718f;
+  font-family: Silkscreen, monospace;
+  font-size: 10px;
+}
+
+.leaderboard-first .leaderboard-rank,
+.leaderboard-first .leaderboard-time {
+  color: #ffd166;
+}
+
+.leaderboard-player-name {
+  overflow: hidden;
+  color: #e6d9f0;
+  font-size: 12px;
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.leaderboard-time {
+  color: #00eaff;
+  font-family: Silkscreen, monospace;
+  font-size: clamp(10px, 2vw, 13px);
+  text-align: right;
+  white-space: nowrap;
+}
+
+.leaderboard-message,
+.leaderboard-empty {
+  padding: 30px 12px;
+  text-align: center;
+}
+
+.leaderboard-message {
+  color: #a99ab9;
+  font-family: Silkscreen, monospace;
+  font-size: 8px;
+  line-height: 1.9;
+}
+
+.leaderboard-empty-mark {
+  display: block;
+  margin-bottom: 9px;
+  color: #ff38b8;
+  font-family: monospace;
+  font-size: 26px;
+}
+
+.leaderboard-empty strong {
+  color: #e6d9f0;
+  font-family: Silkscreen, monospace;
+  font-size: 9px;
+  line-height: 1.8;
+}
+
+.leaderboard-empty p {
+  margin: 8px 0 0;
+  color: #82718f;
+  font-size: 12px;
+}
+
+.leaderboard-footer {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 12px;
+  padding-top: 13px;
+  border-top: 1px solid rgba(173, 120, 255, .18);
+  color: #82718f;
+  font-family: Silkscreen, monospace;
+  font-size: 7px;
+  line-height: 1.8;
+}
+
+@media (max-width: 480px) {
+  .leaderboard {
+    width: calc(100% - 20px);
+    margin: 20px auto 28px;
+    padding: 14px 10px;
+  }
+
+  .leaderboard-header {
+    gap: 8px;
+  }
+
+  .leaderboard-live {
+    padding: 6px;
+    font-size: 6px;
+  }
+
+  .leaderboard-columns {
+    font-size: 6px;
+  }
+
+  .leaderboard-row {
+    padding: 9px 6px;
+  }
+
+  .leaderboard-player {
+    gap: 8px;
+  }
+
+  .leaderboard-player-name {
+    font-size: 11px;
+  }
+
+  .leaderboard-footer {
+    flex-direction: column;
+    gap: 3px;
+  }
+}

@@ -1,6 +1,7 @@
-import { useState } from 'react'
+﻿import { useState } from 'react'
 import { useWallet } from './lib/useWallet.js'
 import ArcadeGame from './game/ArcadeGame.jsx'
+import Leaderboard from './components/Leaderboard.jsx'
 
 export default function App() {
   const [walletMenuOpen, setWalletMenuOpen] = useState(false)
@@ -172,6 +173,8 @@ export default function App() {
           </div>
         )}
       </section>
+
+      <Leaderboard />
 
       <footer className="footer">
         <span>TT / 001</span>
